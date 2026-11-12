@@ -1,0 +1,209 @@
+@page
+@model PIA_Gimnasio.Pages.ControlAcceso.IndexModel
+@{
+    ViewData["Title"] = "Control de Acceso";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check me-2"></i>Control de Acceso</h3>
+        <p class="text-muted small mb-0">Registro de entrada y salida de socios a las instalaciones en tiempo real.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <a asp-page="/Index" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Panel de Recepción / Registro Rápido -->
+    <div class="col-lg-4">
+        <div class="card bg-white shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white py-3">
+                <h6 class="card-title mb-0 fw-semibold">
+                    <i class="bi bi-person-bounding-box me-2"></i>Torniquete / Recepción
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <form method="post">
+                    <div class="mb-3">
+                        <label asp-for="IdClienteAcceso" class="form-label small fw-semibold">Socio *</label>
+                        <select asp-for="IdClienteAcceso" class="form-select form-select-sm" required>
+                            <option value="">-- Selecciona socio por folio o nombre --</option>
+                            @if (Model.Socios != null)
+                            {
+                                foreach (System.Data.DataRow c in Model.Socios.Rows)
+                                {
+                                    var idC = c["IdCliente"]?.ToString();
+                                    var folio = c["Folio"]?.ToString();
+                                    var nombreC = $"{folio} &bull; {c["PrimerApellido"]} {c["Nombres"]}";
+                                    <option value="@idC">@folio - @c["PrimerApellido"] @c["Nombres"]</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="IdSucursalAcceso" class="form-label small fw-semibold">Sucursal de Acceso *</label>
+                        <select asp-for="IdSucursalAcceso" class="form-select form-select-sm" required>
+                            <option value="">-- Selecciona sucursal --</option>
+                            @if (Model.Sucursales != null)
+                            {
+                                foreach (System.Data.DataRow s in Model.Sucursales.Rows)
+                                {
+                                    var idSuc = s["IdSucursal"]?.ToString();
+                                    var nomSuc = s["Nombre"]?.ToString();
+                                    var ciudad = s["Ciudad"]?.ToString();
+                                    <option value="@idSuc">@nomSuc (@ciudad)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" asp-page-handler="Entrada" class="btn btn-dark btn-sm py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Registrar Entrada
+                        </button>
+                        <button type="submit" asp-page-handler="Salida" class="btn btn-outline-dark btn-sm py-2">
+                            <i class="bi bi-box-arrow-right me-2"></i>Registrar Salida
+                        </button>
+                    </div>
+
+                    <div class="form-text small text-muted mt-3">
+                        <i class="bi bi-info-circle me-1"></i>El sistema valida automáticamente que el socio cuente con una membresía activa y vigente antes de permitir el acceso.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Accesos -->
+    <div class="col-lg-8">
+        <!-- Filtros -->
+        <div class="card bg-white shadow-sm border-0 mb-3">
+            <div class="card-body p-3">
+                <form method="get" class="row g-2">
+                    <div class="col-md-5">
+                        <select asp-for="FiltroSucursal" class="form-select form-select-sm">
+                            <option value="">Todas las sucursales</option>
+                            @if (Model.Sucursales != null)
+                            {
+                                foreach (System.Data.DataRow s in Model.Sucursales.Rows)
+                                {
+                                    var idSucF = s["IdSucursal"]?.ToString();
+                                    var nomSucF = s["Nombre"]?.ToString();
+                                    <option value="@idSucF">@nomSucF</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="date" asp-for="FiltroFecha" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-funnel me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card bg-white shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3" style="width: 50px;">ID</th>
+                            <th>Socio</th>
+                            <th>Sucursal</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th style="width: 100px;">Permanencia</th>
+                            <th class="text-end pe-3" style="width: 120px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Accesos == null || Model.Accesos.Rows.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                                    No hay registros de acceso en el período seleccionado.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (System.Data.DataRow row in Model.Accesos.Rows)
+                            {
+                                var idAcceso = Convert.ToInt32(row["IdControlAcceso"]);
+                                var idCli = Convert.ToInt32(row["IdCliente"]);
+                                var folio = row["Folio"]?.ToString() ?? "";
+                                var cliente = row["Cliente"]?.ToString() ?? "";
+                                var sucursal = row["Sucursal"]?.ToString() ?? "";
+                                var entrada = Convert.ToDateTime(row["FechaHoraEntrada"]).ToString("dd/MM/yyyy HH:mm");
+                                var salida = row["FechaHoraSalida"] == DBNull.Value ? null : Convert.ToDateTime(row["FechaHoraSalida"]).ToString("dd/MM/yyyy HH:mm");
+                                var minutos = Convert.ToInt32(row["MinutosPermanencia"]);
+                                var estado = row["EstadoAcceso"]?.ToString() ?? "";
+                                var esPendiente = row["FechaHoraSalida"] == DBNull.Value;
+
+                                <tr>
+                                    <td class="ps-3 fw-bold text-muted">@idAcceso</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">@cliente</div>
+                                        <small class="text-muted"><i class="bi bi-tag me-1"></i>@folio</small>
+                                    </td>
+                                    <td>@sucursal</td>
+                                    <td>
+                                        <small><i class="bi bi-box-arrow-in-right text-success me-1"></i>@entrada</small>
+                                    </td>
+                                    <td>
+                                        @if (salida != null)
+                                        {
+                                            <small><i class="bi bi-box-arrow-right text-muted me-1"></i>@salida</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-dark text-white">Dentro</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            @minutos min
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        @if (esPendiente)
+                                        {
+                                            <form method="post" asp-page-handler="Salida" asp-route-idCliente="@idCli" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-dark btn-sm" title="Marcar salida">
+                                                    <i class="bi bi-box-arrow-right me-1"></i>Salida
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small"><i class="bi bi-check2-circle text-muted"></i></span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

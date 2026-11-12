@@ -1,0 +1,16 @@
+@page
+@{
+    ViewData["Title"] = "Acceso Denegado";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card p-4 shadow-sm border-0">
+            <h3 class="text-danger fw-bold mb-2">Acceso No Autorizado</h3>
+            <p class="text-muted">No cuentas con los permisos necesarios para acceder a esta sección del sistema.</p>
+            <div>
+                <a asp-page="/Index" class="btn btn-primary">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+</div>

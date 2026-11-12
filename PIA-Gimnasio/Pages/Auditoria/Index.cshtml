@@ -1,0 +1,237 @@
+@page
+@model PIA_Gimnasio.Pages.Auditoria.IndexModel
+@{
+    ViewData["Title"] = "Bitácora de Auditoría";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-clock-history me-2"></i>Bitácora de Auditoría</h3>
+        <p class="text-muted small mb-0">Trazabilidad y registro inmutable de transacciones (altas, modificaciones y bajas) en el gimnasio.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <a asp-page="/Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+<!-- Filtros de Auditoría -->
+<div class="card bg-white shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Tabla Auditada</label>
+                <select name="FiltroTabla" class="form-select form-select-sm">
+                    <option value="">-- Todas las tablas --</option>
+                    @foreach (var t in Model.TablasAuditadas)
+                    {
+                        var sel = Model.FiltroTabla == t ? "selected" : null;
+                        <option value="@t" selected="@sel">@t</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Operación</label>
+                <select name="FiltroOperacion" class="form-select form-select-sm">
+                    <option value="">-- Todas --</option>
+                    @{ var selOp1 = Model.FiltroOperacion == "INSERT" ? "selected" : null; }
+                    <option value="INSERT" selected="@selOp1">INSERT (Alta)</option>
+                    @{ var selOp2 = Model.FiltroOperacion == "UPDATE" ? "selected" : null; }
+                    <option value="UPDATE" selected="@selOp2">UPDATE (Modificación)</option>
+                    @{ var selOp3 = Model.FiltroOperacion == "DELETE" ? "selected" : null; }
+                    <option value="DELETE" selected="@selOp3">DELETE (Eliminación)</option>
+                    @{ var selOp4 = Model.FiltroOperacion == "BAJA" ? "selected" : null; }
+                    <option value="BAJA" selected="@selOp4">BAJA (Lógica)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Usuario Operador</label>
+                <select name="FiltroUsuario" class="form-select form-select-sm">
+                    <option value="">-- Todos los usuarios --</option>
+                    @foreach (var u in Model.Usuarios)
+                    {
+                        var sel = Model.FiltroUsuario == u.IdUsuario ? "selected" : null;
+                        <option value="@u.IdUsuario" selected="@sel">@u.NombreCuenta [@u.Rol]</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">ID Registro</label>
+                <input type="number" name="FiltroIdRegistro" value="@Model.FiltroIdRegistro" class="form-control form-control-sm" placeholder="Ej. 10" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Fecha Inicio</label>
+                <input type="date" name="FechaInicio" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2 offset-md-8">
+                <label class="form-label small fw-semibold">Fecha Fin</label>
+                <input type="date" name="FechaFin" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2 text-md-end mt-2">
+                <button type="submit" class="btn btn-dark btn-sm me-1">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a asp-page="/Auditoria/Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Registros de Auditoría -->
+<div class="card bg-white shadow-sm border-0">
+    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="card-title mb-0 fw-semibold">
+            <i class="bi bi-journal-text me-2"></i>Registros de Auditoría (@Model.Auditorias.Count)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Auditorias.Count == 0)
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-shield-x display-6 d-block mb-2 text-secondary"></i>
+                No se encontraron registros de auditoría con los criterios indicados.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>#ID</th>
+                            <th>Fecha y Hora</th>
+                            <th>Entidad / Tabla</th>
+                            <th>Registro</th>
+                            <th>Operación</th>
+                            <th>Usuario Responsable</th>
+                            <th class="text-end">Inspeccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Auditorias)
+                        {
+                            var badgeOp = a.TipoOperacion switch
+                            {
+                                "INSERT" => "bg-dark text-white",
+                                "UPDATE" => "bg-secondary text-white",
+                                "DELETE" => "bg-danger text-white",
+                                "BAJA" => "bg-warning text-dark",
+                                _ => "bg-light text-dark border"
+                            };
+
+                            <tr>
+                                <td class="small fw-bold text-muted">#@a.IdAuditoria</td>
+                                <td class="small">
+                                    <div class="fw-semibold">@a.FechaOperacion.ToString("dd/MM/yyyy")</div>
+                                    <span class="text-muted small">@a.FechaOperacion.ToString("HH:mm:ss")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-semibold">@a.NombreTabla</span>
+                                </td>
+                                <td class="small fw-semibold">ID: #@a.IdRegistro</td>
+                                <td>
+                                    <span class="badge @badgeOp">@a.TipoOperacion</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(a.NombreCuenta))
+                                    {
+                                        <div class="fw-semibold small">@a.NombreCuenta <span class="badge bg-light text-dark border small">@a.RolUsuario</span></div>
+                                        <span class="text-muted small">@a.Operador</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sistema / Automático</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-dark btn-sm py-0 px-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalJsonAuditoria"
+                                            data-id="@a.IdAuditoria"
+                                            data-tabla="@a.NombreTabla"
+                                            data-reg="@a.IdRegistro"
+                                            data-op="@a.TipoOperacion"
+                                            data-ant='@Html.Raw(a.ValoresAnteriores ?? "")'
+                                            data-nue='@Html.Raw(a.ValoresNuevos ?? "")'
+                                            onclick="mostrarDetalleAuditoria(this)">
+                                        <i class="bi bi-code-slash me-1"></i>JSON
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Detalle JSON de Auditoría -->
+<div class="modal fade" id="modalJsonAuditoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold" id="modalAuditoriaTitulo">
+                    <i class="bi bi-braces me-2"></i>Detalle de Transacción
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <span class="small fw-bold text-muted d-block mb-1">
+                            <i class="bi bi-arrow-left-circle me-1"></i>Valores Anteriores (Estado Previo)
+                        </span>
+                        <div class="bg-light p-3 rounded border" style="min-height: 200px; max-height: 350px; overflow-y: auto;">
+                            <pre class="mb-0 small text-dark" id="txtValoresAnteriores" style="white-space: pre-wrap; word-break: break-all;"></pre>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="small fw-bold text-dark d-block mb-1">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Valores Nuevos (Estado Aplicado)
+                        </span>
+                        <div class="bg-light p-3 rounded border" style="min-height: 200px; max-height: 350px; overflow-y: auto;">
+                            <pre class="mb-0 small text-dark" id="txtValoresNuevos" style="white-space: pre-wrap; word-break: break-all;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-dark btn-sm" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function mostrarDetalleAuditoria(btn) {
+            var id = btn.getAttribute('data-id');
+            var tabla = btn.getAttribute('data-tabla');
+            var reg = btn.getAttribute('data-reg');
+            var op = btn.getAttribute('data-op');
+            var ant = btn.getAttribute('data-ant');
+            var nue = btn.getAttribute('data-nue');
+
+            document.getElementById('modalAuditoriaTitulo').innerHTML =
+                '<i class="bi bi-braces me-2"></i>Auditoría #' + id + ' — ' + tabla + ' (Registro #' + reg + ') [' + op + ']';
+
+            // Formatear JSON si es posible
+            document.getElementById('txtValoresAnteriores').textContent = formatearJson(ant);
+            document.getElementById('txtValoresNuevos').textContent = formatearJson(nue);
+        }
+
+        function formatearJson(raw) {
+            if (!raw || raw.trim() === '') return '(Sin registros anteriores / null)';
+            try {
+                var obj = JSON.parse(raw);
+                return JSON.stringify(obj, null, 2);
+            } catch (e) {
+                return raw;
+            }
+        }
+    </script>
+}

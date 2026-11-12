@@ -1,0 +1,234 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio";
+    var nombre = User.FindFirst("NombreCompleto")?.Value ?? User.Identity?.Name ?? "Usuario";
+    var rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+    var sucursal = User.FindFirst("Sucursal")?.Value ?? "Sucursal General";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-4 bg-white rounded border shadow-sm">
+            <h3 class="fw-bold text-dark mb-1">Bienvenido, @nombre</h3>
+            <p class="text-muted mb-0 small">Rol: <strong>@rol</strong> | Sucursal: <strong>@sucursal</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista"))
+    {
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-people me-2"></i>Gestión de Socios
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Registro de nuevos socios, consulta de folios, actualización de información y control de estatus.
+                    </p>
+                    <a asp-page="/Clientes/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Socios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-person-check me-2"></i>Membresías
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Asignación de planes a socios, cálculo de vigencias mensuales y control de suscripciones.
+                    </p>
+                    <a asp-page="/Membresias/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Membresías
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-shield-check me-2"></i>Control de Acceso
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Validación y registro de entrada y salida de socios en recepción verificando membresía activa.
+                    </p>
+                    <a asp-page="/ControlAcceso/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Acceso
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista") || User.IsInRole("Entrenador"))
+    {
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-calendar3 me-2"></i>Clases y Horarios
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Programación de clases grupales, consulta de cartelera, asignación de instructores y cupos.
+                    </p>
+                    <a asp-page="/Clases/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Clases
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-card-checklist me-2"></i>Reservas y Asistencia
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Inscripción de socios a clases según su membresía y registro de asistencia / pase de lista.
+                    </p>
+                    <a asp-page="/Reservas/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Reservas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-file-medical me-2"></i>Expedientes Médicos
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Ficha médica de socios: registro de tipo de sangre y control de condiciones médicas o alergias.
+                    </p>
+                    <a asp-page="/Expedientes/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Expedientes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-person-walking me-2"></i>Rutinas de Entrenamiento
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Planes semanales de ejercicios, control de objetivos y validación de contraindicaciones médicas.
+                    </p>
+                    <a asp-page="/Rutinas/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Rutinas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes Oficiales
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Consultas y estadísticas de socios, torniquetes, asistencia de clases grupales y personal.
+                    </p>
+                    <a asp-page="/Reportes/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole("Administrador"))
+    {
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-person-badge me-2"></i>Empleados
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Administración de personal del gimnasio, asignación de puestos laborales y sucursales.
+                    </p>
+                    <a asp-page="/Empleados/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Empleados
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-building me-2"></i>Sucursales
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Administración de sedes de la cadena de gimnasios, ubicación y estatus de operación.
+                    </p>
+                    <a asp-page="/Sucursales/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Sucursales
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-people me-2"></i>Cuentas de Usuario
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Administración de cuentas de acceso para operadores, asignación de roles y cambio de contraseñas.
+                    </p>
+                    <a asp-page="/Usuarios/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-door-open me-2"></i>Salones
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Espacios físicos y salas de entrenamiento acondicionadas para clases y actividades.
+                    </p>
+                    <a asp-page="/Salones/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Salones
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">
+                        <i class="bi bi-clock-history me-2"></i>Bitácora de Auditoría
+                    </h5>
+                    <p class="card-text text-muted small">
+                        Registro histórico inmutable de operaciones (altas, bajas y cambios) con trazabilidad JSON.
+                    </p>
+                    <a asp-page="/Auditoria/Index" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Auditoría
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

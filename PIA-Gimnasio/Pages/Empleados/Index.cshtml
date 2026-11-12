@@ -1,0 +1,259 @@
+@page
+@model PIA_Gimnasio.Pages.Empleados.IndexModel
+@{
+    ViewData["Title"] = "Gestión de Empleados";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-person-badge me-2"></i>Empleados</h3>
+        <p class="text-muted small mb-0">Administración de personal del gimnasio, asignación de puestos y sucursales.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <a asp-page="/Index" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Formulario Crear / Editar -->
+    <div class="col-lg-4">
+        <div class="card bg-white shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3">
+                <h6 class="card-title mb-0 fw-semibold">
+                    <i class="bi @(Model.Empleado.IdEmpleado > 0 ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+                    @(Model.Empleado.IdEmpleado > 0 ? "Modificar Empleado" : "Nuevo Empleado")
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <form method="post" asp-page-handler="Guardar">
+                    <input type="hidden" asp-for="Empleado.IdEmpleado" />
+
+                    <div class="mb-3">
+                        <label asp-for="Empleado.Nombres" class="form-label small fw-semibold">Nombres *</label>
+                        <input asp-for="Empleado.Nombres" class="form-control form-control-sm" placeholder="Ej. Juan Carlos" required maxlength="50" />
+                        <span asp-validation-for="Empleado.Nombres" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.PrimerApellido" class="form-label small fw-semibold">Primer Apellido *</label>
+                            <input asp-for="Empleado.PrimerApellido" class="form-control form-control-sm" placeholder="Ej. Pérez" required maxlength="50" />
+                            <span asp-validation-for="Empleado.PrimerApellido" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.SegundoApellido" class="form-label small fw-semibold">Segundo Apellido</label>
+                            <input asp-for="Empleado.SegundoApellido" class="form-control form-control-sm" placeholder="Ej. Gómez" maxlength="50" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Empleado.CURP" class="form-label small fw-semibold">CURP *</label>
+                        <input asp-for="Empleado.CURP" class="form-control form-control-sm" placeholder="Ej. ABCD123456EFGH7890" required maxlength="18" />
+                        <span asp-validation-for="Empleado.CURP" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.Telefono" class="form-label small fw-semibold">Teléfono *</label>
+                            <input asp-for="Empleado.Telefono" class="form-control form-control-sm" placeholder="8112345678" required maxlength="20" />
+                            <span asp-validation-for="Empleado.Telefono" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.Correo" class="form-label small fw-semibold">Correo *</label>
+                            <input asp-for="Empleado.Correo" class="form-control form-control-sm" placeholder="ejemplo@dominio.com" required maxlength="254" />
+                            <span asp-validation-for="Empleado.Correo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.FechaNacimiento" class="form-label small fw-semibold">Fecha Nac.*</label>
+                            <input asp-for="Empleado.FechaNacimiento" type="date" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.FechaContratacion" class="form-label small fw-semibold">Fecha Contr.*</label>
+                            <input asp-for="Empleado.FechaContratacion" type="date" class="form-control form-control-sm" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.IdPuesto" class="form-label small fw-semibold">Puesto *</label>
+                            <select asp-for="Empleado.IdPuesto" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona --</option>
+                                @if (Model.Puestos != null)
+                                {
+                                    foreach (System.Data.DataRow p in Model.Puestos.Rows)
+                                    {
+                                        var idPuesto = p["IdPuesto"]?.ToString();
+                                        var nombrePuesto = p["Nombre"]?.ToString();
+                                        <option value="@idPuesto">@nombrePuesto</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Empleado.IdSucursal" class="form-label small fw-semibold">Sucursal *</label>
+                            <select asp-for="Empleado.IdSucursal" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona --</option>
+                                @if (Model.Sucursales != null)
+                                {
+                                    foreach (System.Data.DataRow s in Model.Sucursales.Rows)
+                                    {
+                                        var idSucursal = s["IdSucursal"]?.ToString();
+                                        var textoSucursal = $"{s["Nombre"]} ({s["Ciudad"]})";
+                                        <option value="@idSucursal">@textoSucursal</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Empleado.IdEstatus" class="form-label small fw-semibold">Estatus</label>
+                        <select asp-for="Empleado.IdEstatus" class="form-select form-select-sm">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-2">
+                        @if (Model.Empleado.IdEmpleado > 0)
+                        {
+                            <a asp-page="/Empleados/Index" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x me-1"></i>Cancelar
+                            </a>
+                        }
+                        <button type="submit" class="btn btn-dark btn-sm ms-auto">
+                            <i class="bi bi-save me-1"></i>@(Model.Empleado.IdEmpleado > 0 ? "Actualizar" : "Registrar")
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Empleados -->
+    <div class="col-lg-8">
+        <div class="card bg-white shadow-sm border-0 mb-3">
+            <div class="card-body p-3">
+                <form method="get" class="row g-2">
+                    <div class="col-md-5">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" asp-for="Buscar" class="form-control" placeholder="Buscar por nombre o CURP..." />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select asp-for="FiltroEstatus" class="form-select form-select-sm">
+                            <option value="">Todos los estatus</option>
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select asp-for="IdSucursalFiltro" class="form-select form-select-sm">
+                            <option value="">Todas las sucursales</option>
+                            @if (Model.Sucursales != null)
+                            {
+                                foreach (System.Data.DataRow s in Model.Sucursales.Rows)
+                                {
+                                    var idSucursal = s["IdSucursal"]?.ToString();
+                                    var nombreSucursal = s["Nombre"]?.ToString();
+                                    <option value="@idSucursal">@nombreSucursal</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-funnel me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card bg-white shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3" style="width: 50px;">ID</th>
+                            <th>Nombre</th>
+                            <th>Puesto / Sucursal</th>
+                            <th>Estatus</th>
+                            <th class="text-end pe-3" style="width: 180px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Empleados == null || Model.Empleados.Rows.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                                    No se encontraron empleados registrados.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (System.Data.DataRow r in Model.Empleados.Rows)
+                            {
+                                var id = Convert.ToInt32(r["IdEmpleado"]);
+                                var estatus = r["Estatus"]?.ToString() ?? "";
+                                var activo = estatus.Equals("Activo", StringComparison.OrdinalIgnoreCase);
+
+                                <tr>
+                                    <td class="ps-3 fw-bold text-muted">@id</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">
+                                            @r["PrimerApellido"] @(r["SegundoApellido"] != DBNull.Value ? r["SegundoApellido"] + " " : "")@r["Nombres"]
+                                        </div>
+                                        <small class="text-muted">CURP: @r["CURP"]</small>
+                                    </td>
+                                    <td>
+                                        <div><strong>Puesto:</strong> @r["Puesto"]</div>
+                                        <div><strong>Sucursal:</strong> @r["Sucursal"]</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(activo ? "bg-dark text-white" : "bg-secondary text-white")">
+                                            @estatus
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-page="/Empleados/Index" asp-page-handler="Editar" asp-route-id="@id" class="btn btn-outline-dark" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            @if (activo)
+                                            {
+                                                <form method="post" asp-page-handler="Baja" asp-route-id="@id" class="d-inline" onsubmit="return confirm('¿Confirmas la baja lógica de este empleado?');">
+                                                    <button type="submit" class="btn btn-outline-danger" title="Dar de baja">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

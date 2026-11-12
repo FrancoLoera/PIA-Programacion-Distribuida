@@ -1,0 +1,244 @@
+@page
+@model PIA_Gimnasio.Pages.Sucursales.IndexModel
+@{
+    ViewData["Title"] = "Gestión de Sucursales";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-building me-2"></i>Sucursales
+        </h3>
+        <p class="text-muted small mb-0">Administración de sucursales del gimnasio y sedes de operación.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <a asp-page="/Index" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Volver al Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Formulario Crear/Editar -->
+    <div class="col-lg-5">
+        <div class="card bg-white shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3">
+                <h6 class="card-title mb-0 fw-semibold">
+                    <i class="bi @(Model.Sucursal.IdSucursal > 0 ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+                    @(Model.Sucursal.IdSucursal > 0 ? "Modificar Sucursal" : "Nueva Sucursal")
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <form method="post" asp-page-handler="Guardar">
+                    <input type="hidden" asp-for="Sucursal.IdSucursal" />
+
+                    <div class="mb-3">
+                        <label asp-for="Sucursal.Nombre" class="form-label small fw-semibold">Nombre de la Sucursal *</label>
+                        <input asp-for="Sucursal.Nombre" class="form-control form-control-sm" placeholder="Ej. Sucursal San Pedro" required maxlength="80" />
+                        <span asp-validation-for="Sucursal.Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.Ciudad" class="form-label small fw-semibold">Ciudad *</label>
+                            <input asp-for="Sucursal.Ciudad" class="form-control form-control-sm" placeholder="Ej. Monterrey" required maxlength="100" />
+                            <span asp-validation-for="Sucursal.Ciudad" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.Estado" class="form-label small fw-semibold">Estado *</label>
+                            <input asp-for="Sucursal.Estado" class="form-control form-control-sm" placeholder="Ej. Nuevo León" required maxlength="100" />
+                            <span asp-validation-for="Sucursal.Estado" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <label asp-for="Sucursal.Calle" class="form-label small fw-semibold">Calle *</label>
+                            <input asp-for="Sucursal.Calle" class="form-control form-control-sm" placeholder="Ej. Av. Vasconcelos" required maxlength="100" />
+                            <span asp-validation-for="Sucursal.Calle" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Sucursal.NumeroExterior" class="form-label small fw-semibold">No. Ext *</label>
+                            <input asp-for="Sucursal.NumeroExterior" class="form-control form-control-sm" placeholder="100" required maxlength="20" />
+                            <span asp-validation-for="Sucursal.NumeroExterior" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.NumeroInterior" class="form-label small fw-semibold">No. Int</label>
+                            <input asp-for="Sucursal.NumeroInterior" class="form-control form-control-sm" placeholder="Local 4" maxlength="20" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.Colonia" class="form-label small fw-semibold">Colonia *</label>
+                            <input asp-for="Sucursal.Colonia" class="form-control form-control-sm" placeholder="Del Valle" required maxlength="100" />
+                            <span asp-validation-for="Sucursal.Colonia" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.Telefono" class="form-label small fw-semibold">Teléfono *</label>
+                            <input asp-for="Sucursal.Telefono" class="form-control form-control-sm" placeholder="8112345678" required maxlength="20" />
+                            <span asp-validation-for="Sucursal.Telefono" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.AforoMaximo" class="form-label small fw-semibold">Aforo Máximo *</label>
+                            <input asp-for="Sucursal.AforoMaximo" type="number" min="1" max="10000" class="form-control form-control-sm" required />
+                            <span asp-validation-for="Sucursal.AforoMaximo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.HoraApertura" class="form-label small fw-semibold">Apertura *</label>
+                            <input asp-for="Sucursal.HoraApertura" type="time" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Sucursal.HoraCierre" class="form-label small fw-semibold">Cierre *</label>
+                            <input asp-for="Sucursal.HoraCierre" type="time" class="form-control form-control-sm" required />
+                        </div>
+                    </div>
+
+                    @if (Model.Sucursal.IdSucursal > 0)
+                    {
+                        <div class="mb-3">
+                            <label asp-for="Sucursal.IdEstatus" class="form-label small fw-semibold">Estatus</label>
+                            <select asp-for="Sucursal.IdEstatus" class="form-select form-select-sm">
+                                <option value="1">Activa</option>
+                                <option value="2">Inactiva</option>
+                            </select>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between pt-2">
+                        @if (Model.Sucursal.IdSucursal > 0)
+                        {
+                            <a asp-page="/Sucursales/Index" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-x me-1"></i>Cancelar
+                            </a>
+                        }
+                        <button type="submit" class="btn btn-dark btn-sm ms-auto">
+                            <i class="bi bi-save me-1"></i>@(Model.Sucursal.IdSucursal > 0 ? "Actualizar" : "Registrar")
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Sucursales -->
+    <div class="col-lg-7">
+        <div class="card bg-white shadow-sm border-0 mb-3">
+            <div class="card-body p-3">
+                <form method="get" class="row g-2">
+                    <div class="col-md-7">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" asp-for="Buscar" class="form-control" placeholder="Buscar por nombre o ciudad..." />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select asp-for="FiltroEstatus" class="form-select form-select-sm">
+                            <option value="">Todos</option>
+                            <option value="1">Activa</option>
+                            <option value="2">Inactiva</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">
+                            <i class="bi bi-funnel me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card bg-white shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3" style="width: 50px;">ID</th>
+                            <th>Sucursal</th>
+                            <th>Ubicación</th>
+                            <th>Aforo</th>
+                            <th>Estatus</th>
+                            <th class="text-end pe-3" style="width: 170px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Sucursales == null || Model.Sucursales.Rows.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                                    No se encontraron sucursales registradas.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (System.Data.DataRow r in Model.Sucursales.Rows)
+                            {
+                                var id = Convert.ToInt16(r["IdSucursal"]);
+                                var estatus = r["Estatus"]?.ToString() ?? "";
+                                var esActiva = estatus.Equals("Activa", StringComparison.OrdinalIgnoreCase);
+
+                                <tr>
+                                    <td class="ps-3 fw-bold text-muted">@id</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">@r["Nombre"]</div>
+                                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>@(r["Telefono"] != DBNull.Value ? r["Telefono"] : "-")</small>
+                                    </td>
+                                    <td>
+                                        <small class="d-block">@r["Ciudad"], @r["Estado"]</small>
+                                        <small class="text-muted">@r["Calle"] #@r["NumeroExterior"]</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-person me-1"></i>@r["AforoMaximo"]
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(esActiva ? "bg-dark text-white" : "bg-secondary text-white")">
+                                            @estatus
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-page="/Salones/Index" asp-route-idSucursal="@id" class="btn btn-outline-dark" title="Salones">
+                                                <i class="bi bi-door-open me-1"></i>Salones
+                                            </a>
+                                            <a asp-page="/Sucursales/Index" asp-page-handler="Editar" asp-route-id="@id" class="btn btn-outline-dark" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            @if (esActiva)
+                                            {
+                                                <form method="post" asp-page-handler="Baja" asp-route-id="@id" class="d-inline" onsubmit="return confirm('¿Confirmas la baja lógica de esta sucursal?');">
+                                                    <button type="submit" class="btn btn-outline-danger" title="Dar de baja">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@page
+@model PIA_Gimnasio.Pages.LoginModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sistema de Gimnasios</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+</head>
+<body class="bg-light d-flex align-items-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card shadow-sm border">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold text-dark mb-1">Sistema de Gimnasios</h4>
+                            <p class="text-muted small">Ingresa tus credenciales para acceder</p>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Mensaje))
+                        {
+                            <div class="alert alert-danger py-2 small" role="alert">
+                                @Model.Mensaje
+                            </div>
+                        }
+
+                        <form method="post">
+                            <div class="mb-3">
+                                <label for="NombreCuenta" class="form-label text-dark small fw-semibold">Usuario</label>
+                                <input type="text" id="NombreCuenta" name="NombreCuenta" value="@Model.NombreCuenta"
+                                       class="form-control" autocomplete="username" required autofocus />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Contrasena" class="form-label text-dark small fw-semibold">Contraseña</label>
+                                <input type="password" id="Contrasena" name="Contrasena"
+                                       class="form-control" autocomplete="current-password" required />
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-dark">Iniciar Sesión</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer bg-white border-top text-center py-2 text-muted small">
+                        &copy; 2026 Todos los derechos reservados.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

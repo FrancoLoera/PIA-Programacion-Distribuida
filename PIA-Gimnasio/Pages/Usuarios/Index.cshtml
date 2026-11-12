@@ -1,0 +1,308 @@
+@page
+@model PIA_Gimnasio.Pages.Usuarios.IndexModel
+@{
+    ViewData["Title"] = "Cuentas de Usuario";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-people me-2"></i>Cuentas de Usuario</h3>
+        <p class="text-muted small mb-0">Gestión de credenciales de acceso, asignación de roles y control de estatus de operadores.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <button type="button" class="btn btn-dark btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+            <i class="bi bi-person-plus me-1"></i>Nueva Cuenta
+        </button>
+        <a asp-page="/Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<!-- Filtros de búsqueda -->
+<div class="card bg-white shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">Nombre de Cuenta</label>
+                <input type="text" name="FiltroNombre" value="@Model.FiltroNombre" class="form-control form-control-sm" placeholder="Buscar por usuario..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Rol</label>
+                <select name="FiltroRol" class="form-select form-select-sm">
+                    <option value="">-- Todos los roles --</option>
+                    @foreach (var r in Model.Roles)
+                    {
+                        var sel = Model.FiltroRol == r.IdRol ? "selected" : null;
+                        <option value="@r.IdRol" selected="@sel">@r.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Estatus</label>
+                <select name="FiltroEstatus" class="form-select form-select-sm">
+                    <option value="">-- Todos los estatus --</option>
+                    @{ var selUE1 = Model.FiltroEstatus == 1 ? "selected" : null; }
+                    <option value="1" selected="@selUE1">Activo</option>
+                    @{ var selUE2 = Model.FiltroEstatus == 2 ? "selected" : null; }
+                    <option value="2" selected="@selUE2">Inactivo</option>
+                    @{ var selUE3 = Model.FiltroEstatus == 3 ? "selected" : null; }
+                    <option value="3" selected="@selUE3">Bloqueado</option>
+                </select>
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button type="submit" class="btn btn-dark btn-sm me-1">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a asp-page="/Usuarios/Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado de Cuentas -->
+<div class="card bg-white shadow-sm border-0">
+    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="card-title mb-0 fw-semibold">
+            <i class="bi bi-person-lines-fill me-2"></i>Usuarios Registrados (@Model.Usuarios.Count)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Usuarios.Count == 0)
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-person-x display-6 d-block mb-2 text-secondary"></i>
+                No se encontraron cuentas de usuario con los criterios especificados.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Cuenta</th>
+                            <th>Empleado Asociado</th>
+                            <th>Sucursal</th>
+                            <th>Rol</th>
+                            <th>Estatus</th>
+                            <th>Fecha Alta</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in Model.Usuarios)
+                        {
+                            var badgeEstatus = u.IdEstatus == 1 ? "bg-dark text-white" : (u.IdEstatus == 2 ? "bg-secondary text-white" : "bg-light text-dark border");
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">
+                                        <i class="bi bi-person-circle me-1"></i>@u.NombreCuenta
+                                    </div>
+                                    <span class="text-muted small">ID: #@u.IdUsuario</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@u.Empleado</div>
+                                    <span class="text-muted small">ID Empleado: @u.IdEmpleado</span>
+                                </td>
+                                <td class="small text-muted">@u.Sucursal</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@u.Rol</span>
+                                </td>
+                                <td>
+                                    <span class="badge @badgeEstatus">@u.Estatus</span>
+                                </td>
+                                <td class="small text-muted">
+                                    @(u.FechaRegistro != DateTime.MinValue ? u.FechaRegistro.ToString("dd/MM/yyyy") : "-")
+                                </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-dark btn-sm me-1"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditarRol"
+                                            data-id="@u.IdUsuario"
+                                            data-cuenta="@u.NombreCuenta"
+                                            data-rol="@u.IdRol"
+                                            data-estatus="@u.IdEstatus"
+                                            onclick="prepararEdicionRol(this)"
+                                            title="Editar Rol y Estatus">
+                                        <i class="bi bi-pencil me-1"></i>Rol / Estatus
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalCambiarPassword"
+                                            data-id="@u.IdUsuario"
+                                            data-cuenta="@u.NombreCuenta"
+                                            onclick="prepararCambioPassword(this)"
+                                            title="Cambiar Contraseña">
+                                        <i class="bi bi-key me-1"></i>Clave
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Nueva Cuenta de Usuario -->
+<div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Crear">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Registrar Cuenta de Usuario</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Empleado Asignado *</label>
+                        <select asp-for="IdEmpleadoCrear" class="form-select form-select-sm" required>
+                            <option value="">-- Selecciona empleado activo --</option>
+                            @if (Model.Empleados != null)
+                            {
+                                foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                                {
+                                    <option value="@emp["IdEmpleado"]">@emp["Nombres"] @emp["PrimerApellido"] [@emp["Puesto"] - @emp["Sucursal"]]</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text small">Cada empleado solo puede contar con una cuenta de usuario en el sistema.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre de Cuenta (Username) *</label>
+                        <input asp-for="NombreCuentaCrear" type="text" class="form-control form-control-sm" placeholder="Ej. jperez, admin.mty, rgarza" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Contraseña (Texto Plano) *</label>
+                        <input asp-for="ContrasenaCrear" type="text" class="form-control form-control-sm" placeholder="Contraseña de acceso..." required />
+                        <div class="form-text small">Se almacena directamente en texto plano sin cifrado de hash.</div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-semibold">Rol Asignado *</label>
+                            <select asp-for="IdRolCrear" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona rol --</option>
+                                @foreach (var r in Model.Roles)
+                                {
+                                    <option value="@r.IdRol">@r.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-semibold">Estatus Inicial *</label>
+                            <select asp-for="IdEstatusCrear" class="form-select form-select-sm" required>
+                                <option value="1">Activo</option>
+                                <option value="2">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-check-lg me-1"></i>Crear Cuenta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Editar Rol y Estatus -->
+<div class="modal fade" id="modalEditarRol" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Modificar">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Modificar Rol y Estatus</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="IdUsuarioModificar" id="txtEditIdUsuario" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre de Cuenta</label>
+                        <input type="text" id="txtEditNombreCuenta" class="form-control form-control-sm bg-light" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Rol en el Sistema *</label>
+                        <select asp-for="IdRolModificar" id="txtEditIdRol" class="form-select form-select-sm" required>
+                            @foreach (var r in Model.Roles)
+                            {
+                                <option value="@r.IdRol">@r.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Estatus de la Cuenta *</label>
+                        <select asp-for="IdEstatusModificar" id="txtEditIdEstatus" class="form-select form-select-sm" required>
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                            <option value="3">Bloqueado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-save me-1"></i>Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CambiarContrasena">
+                <div class="modal-header bg-dark text-white py-2">
+                    <h6 class="modal-title fw-bold small"><i class="bi bi-key me-1"></i>Cambiar Contraseña</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="IdUsuarioPassword" id="txtPassIdUsuario" />
+                    <div class="mb-2">
+                        <span class="text-muted small d-block">Usuario</span>
+                        <strong id="txtPassNombreCuenta"></strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nueva Contraseña (Texto Plano) *</label>
+                        <input asp-for="NuevaContrasena" type="text" class="form-control form-control-sm" placeholder="Nueva clave..." required />
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-check2 me-1"></i>Actualizar Clave</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function prepararEdicionRol(btn) {
+            document.getElementById('txtEditIdUsuario').value = btn.getAttribute('data-id');
+            document.getElementById('txtEditNombreCuenta').value = btn.getAttribute('data-cuenta');
+            document.getElementById('txtEditIdRol').value = btn.getAttribute('data-rol');
+            document.getElementById('txtEditIdEstatus').value = btn.getAttribute('data-estatus');
+        }
+
+        function prepararCambioPassword(btn) {
+            document.getElementById('txtPassIdUsuario').value = btn.getAttribute('data-id');
+            document.getElementById('txtPassNombreCuenta').textContent = btn.getAttribute('data-cuenta');
+        }
+    </script>
+}

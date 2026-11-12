@@ -1,0 +1,244 @@
+@page
+@model PIA_Gimnasio.Pages.Clientes.IndexModel
+@{
+    ViewData["Title"] = "Gestión de Socios";
+}
+
+<div class="row mb-3 align-items-center">
+    <div class="col-md-6">
+        <h3 class="mb-0 fw-bold text-dark">Socios</h3>
+        <p class="text-muted small mb-0">Registro y administración de socios</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-@(Model.TipoMensaje == "success" ? "success" : "warning") alert-dismissible fade show" role="alert">
+        @Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<!-- Formulario de Registro / Edición -->
+<div class="card mb-4 border shadow-sm">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h6 class="mb-0 fw-bold text-dark">
+            @(Model.Cliente.IdCliente == 0 ? "Registrar nuevo socio" : $"Editar socio: {Model.Cliente.Folio}")
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="post" asp-page-handler="Guardar">
+            <input type="hidden" asp-for="Cliente.IdCliente" />
+            <input type="hidden" asp-for="Cliente.Folio" />
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Cliente.Nombres" class="form-label small fw-semibold">Nombre(s) *</label>
+                    <input asp-for="Cliente.Nombres" class="form-control" maxlength="50" required />
+                    <span asp-validation-for="Cliente.Nombres" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Cliente.PrimerApellido" class="form-label small fw-semibold">Primer apellido *</label>
+                    <input asp-for="Cliente.PrimerApellido" class="form-control" maxlength="50" required />
+                    <span asp-validation-for="Cliente.PrimerApellido" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Cliente.SegundoApellido" class="form-label small fw-semibold">Segundo apellido</label>
+                    <input asp-for="Cliente.SegundoApellido" class="form-control" maxlength="50" />
+                    <span asp-validation-for="Cliente.SegundoApellido" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Cliente.Telefono" class="form-label small fw-semibold">Teléfono *</label>
+                    <input asp-for="Cliente.Telefono" type="tel" class="form-control" maxlength="20" required />
+                    <span asp-validation-for="Cliente.Telefono" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Cliente.Correo" class="form-label small fw-semibold">Correo electrónico *</label>
+                    <input asp-for="Cliente.Correo" type="email" class="form-control" maxlength="254" required />
+                    <span asp-validation-for="Cliente.Correo" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Cliente.FechaNacimiento" class="form-label small fw-semibold">Fecha de nacimiento *</label>
+                    <input asp-for="Cliente.FechaNacimiento" type="date" class="form-control" required />
+                    <span asp-validation-for="Cliente.FechaNacimiento" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Cliente.IdSucursal" class="form-label small fw-semibold">Sucursal asignada *</label>
+                    @if (User.IsInRole("Recepcionista"))
+                    {
+                        <input type="hidden" asp-for="Cliente.IdSucursal" />
+                        var sucursalNombre = Model.Sucursales.Find(s => s.IdSucursal == Model.Cliente.IdSucursal)?.Nombre ?? "Sucursal actual";
+                        <input type="text" class="form-control bg-light" value="@sucursalNombre" readonly />
+                    }
+                    else
+                    {
+                        <select asp-for="Cliente.IdSucursal" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            @foreach (var s in Model.Sucursales)
+                            {
+                                <option value="@s.IdSucursal">@s.Nombre</option>
+                            }
+                        </select>
+                    }
+                    <span asp-validation-for="Cliente.IdSucursal" class="text-danger small"></span>
+                </div>
+
+                @if (Model.Cliente.IdCliente != 0 && User.IsInRole("Administrador"))
+                {
+                    <div class="col-md-3">
+                        <label asp-for="Cliente.IdEstatus" class="form-label small fw-semibold">Estatus</label>
+                        <select asp-for="Cliente.IdEstatus" class="form-select">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                            <option value="3">Suspendido</option>
+                        </select>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-check-lg me-1"></i>@(Model.Cliente.IdCliente == 0 ? "Registrar" : "Guardar cambios")
+                </button>
+                @if (Model.Cliente.IdCliente != 0)
+                {
+                    <a asp-page="/Clientes/Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Filtros de búsqueda -->
+<div class="card mb-3 border shadow-sm">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="Buscar" value="@Model.Buscar" class="form-control" placeholder="Buscar por nombre, folio o correo..." />
+            </div>
+
+            @if (User.IsInRole("Administrador"))
+            {
+                <div class="col-md-3">
+                    <select name="FiltroSucursal" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todas las sucursales</option>
+                        @foreach (var s in Model.Sucursales)
+                        {
+                            <!option value="@s.IdSucursal" @(Model.FiltroSucursal == s.IdSucursal ? "selected" : "")>@s.Nombre</!option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <div class="col-md-3">
+                <select name="FiltroEstatus" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los estatus</option>
+                    <!option value="1" @(Model.FiltroEstatus == 1 ? "selected" : "")>Activo</!option>
+                    <!option value="2" @(Model.FiltroEstatus == 2 ? "selected" : "")>Inactivo</!option>
+                    <!option value="3" @(Model.FiltroEstatus == 3 ? "selected" : "")>Suspendido</!option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-search me-1"></i>Buscar
+                </button>
+                <a asp-page="/Clientes/Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de resultados -->
+<div class="card border shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Folio</th>
+                    <th>Socio</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Sucursal</th>
+                    <th>Inscripción</th>
+                    <th>Estatus</th>
+                    <th class="text-end pe-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Clientes.Rows.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            No se encontraron socios registrados.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (DataRow fila in Model.Clientes.Rows)
+                    {
+                        var id = fila["IdCliente"];
+                        var idEstatus = Convert.ToByte(fila["IdEstatus"]);
+                        var nombreCompleto = $"{fila["PrimerApellido"]} {fila["SegundoApellido"]} {fila["Nombres"]}".Trim();
+
+                        <tr>
+                            <td><code>@fila["Folio"]</code></td>
+                            <td>@nombreCompleto</td>
+                            <td>@fila["Telefono"]</td>
+                            <td>@fila["Correo"]</td>
+                            <td>@fila["Sucursal"]</td>
+                            <td>@Convert.ToDateTime(fila["FechaInscripcion"]).ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (idEstatus == 1)
+                                {
+                                    <span class="badge bg-dark">Activo</span>
+                                }
+                                else if (idEstatus == 2)
+                                {
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-dark border">Suspendido</span>
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                <a asp-page-handler="Editar" asp-route-id="@id" class="btn btn-sm btn-outline-dark">
+                                    <i class="bi bi-pencil me-1"></i>Editar
+                                </a>
+
+                                @if (idEstatus == 1)
+                                {
+                                    <form method="post" asp-page-handler="Baja" asp-route-id="@id" class="d-inline"
+                                          onsubmit="return confirm('¿Dar de baja a este socio? Se cancelarán sus reservas futuras y se conservará su historial.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-person-x me-1"></i>Baja
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="Reactivar" asp-route-id="@id" class="d-inline"
+                                          onsubmit="return confirm('¿Desea reactivar a este socio?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Reactivar
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

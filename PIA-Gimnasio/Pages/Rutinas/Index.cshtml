@@ -1,0 +1,519 @@
+@page
+@model PIA_Gimnasio.Pages.Rutinas.IndexModel
+@{
+    ViewData["Title"] = "Rutinas de Entrenamiento";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-person-walking me-2"></i>Rutinas de Entrenamiento</h3>
+        <p class="text-muted small mb-0">Planes de entrenamiento semanales asignados a socios con validación médica de contraindicaciones.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        @if (Model.PuedeEditar)
+        {
+            <button type="button" class="btn btn-dark btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modalNuevaRutina">
+                <i class="bi bi-plus-circle me-1"></i>Nueva Rutina
+            </button>
+        }
+        @if (Model.AlertasMedicas.Count > 0)
+        {
+            <a asp-page="/Rutinas/Index" asp-route-VerAlertas="@(!Model.VerAlertas)" class="btn btn-outline-danger btn-sm me-1">
+                <i class="bi bi-exclamation-triangle me-1"></i>Alertas Médicas (@Model.AlertasMedicas.Count)
+            </a>
+        }
+        <a asp-page="/Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+@if (Model.AlertasMedicas.Count > 0 && Model.VerAlertas)
+{
+    <div class="card border-danger shadow-sm mb-4">
+        <div class="card-header bg-danger text-white py-2 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold small">
+                <i class="bi bi-shield-exclamation me-2"></i>Atención Médica: Rutinas Activas con Ejercicios Contraindicados (Regla 6.11)
+            </h6>
+            <a asp-page="/Rutinas/Index" asp-route-VerAlertas="false" class="btn btn-sm btn-outline-light py-0 px-2">Cerrar</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Rutina</th>
+                            <th>Socio</th>
+                            <th>Entrenador</th>
+                            <th>Ejercicio Contraindicado</th>
+                            <th>Condición Médica</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.AlertasMedicas)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@a.Rutina</td>
+                                <td>[@a.Folio] @a.Socio</td>
+                                <td class="small text-muted">@a.Entrenador</td>
+                                <td><span class="badge bg-danger text-white">@a.EjercicioContraindicado</span></td>
+                                <td><span class="badge bg-dark text-white">@a.CondicionMedica</span></td>
+                                <td class="text-end">
+                                    <a asp-page="/Rutinas/Index" asp-route-RutinaDetalle="@a.IdRutina" class="btn btn-outline-dark btn-sm py-0 px-2">
+                                        Revisar Plan
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filtros de búsqueda -->
+<div class="card bg-white shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Socio</label>
+                <select name="FiltroCliente" class="form-select form-select-sm">
+                    <option value="">-- Todos los socios --</option>
+                    @if (Model.Socios != null)
+                    {
+                        foreach (System.Data.DataRow s in Model.Socios.Rows)
+                        {
+                            var id = Convert.ToInt32(s["IdCliente"]);
+                            var sel = Model.FiltroCliente == id ? "selected" : null;
+                            <option value="@id" selected="@sel">[@s["Folio"]] @s["Nombres"] @s["PrimerApellido"]</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Entrenador</label>
+                <select name="FiltroEmpleado" class="form-select form-select-sm">
+                    <option value="">-- Todos los instructores --</option>
+                    @if (Model.Empleados != null)
+                    {
+                        foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                        {
+                            var id = Convert.ToInt32(emp["IdEmpleado"]);
+                            var sel = Model.FiltroEmpleado == id ? "selected" : null;
+                            <option value="@id" selected="@sel">@emp["Nombres"] @emp["PrimerApellido"]</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Estatus</label>
+                <select name="FiltroEstatus" class="form-select form-select-sm">
+                    <option value="">-- Todos --</option>
+                    @{ var selRE1 = Model.FiltroEstatus == 1 ? "selected" : null; }
+                    <option value="1" selected="@selRE1">Activa</option>
+                    @{ var selRE2 = Model.FiltroEstatus == 2 ? "selected" : null; }
+                    <option value="2" selected="@selRE2">Finalizada</option>
+                    @{ var selRE3 = Model.FiltroEstatus == 3 ? "selected" : null; }
+                    <option value="3" selected="@selRE3">Suspendida</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Nombre</label>
+                <input type="text" name="FiltroNombre" value="@Model.FiltroNombre" class="form-control form-control-sm" placeholder="Buscar rutina..." />
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button type="submit" class="btn btn-dark btn-sm me-1">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a asp-page="/Rutinas/Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Listado General de Rutinas -->
+    <div class="@(Model.RutinaActual != null ? "col-lg-5" : "col-12")">
+        <div class="card bg-white shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="card-title mb-0 fw-semibold">
+                    <i class="bi bi-list-task me-2"></i>Rutinas Registradas (@Model.Rutinas.Count)
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Rutinas.Count == 0)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clipboard-x display-6 d-block mb-2 text-secondary"></i>
+                        No se encontraron rutinas registradas con los filtros seleccionados.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Rutina</th>
+                                    <th>Socio</th>
+                                    <th>Estatus</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in Model.Rutinas)
+                                {
+                                    var estaSeleccionada = Model.RutinaActual?.IdRutina == r.IdRutina;
+                                    var badgeClass = r.IdEstatus == 1 ? "bg-dark text-white" : (r.IdEstatus == 2 ? "bg-secondary text-white" : "bg-light text-dark border");
+                                    <tr class="@(estaSeleccionada ? "table-active" : "")">
+                                        <td>
+                                            <div class="fw-bold text-dark">@r.Nombre</div>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-person me-1"></i>@r.Entrenador
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@r.Cliente</div>
+                                            <span class="text-muted small">Folio: @r.Folio</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @badgeClass">@r.Estatus</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-page="/Rutinas/Index"
+                                               asp-route-RutinaDetalle="@r.IdRutina"
+                                               asp-route-FiltroCliente="@Model.FiltroCliente"
+                                               asp-route-FiltroEmpleado="@Model.FiltroEmpleado"
+                                               asp-route-FiltroEstatus="@Model.FiltroEstatus"
+                                               class="btn btn-outline-dark btn-sm">
+                                                <i class="bi bi-eye me-1"></i>Plan
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Detalle y Ejercicios Semanales de la Rutina Seleccionada -->
+    @if (Model.RutinaActual != null)
+    {
+        <div class="col-lg-7">
+            <div class="card bg-white shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0 fw-semibold">
+                            <i class="bi bi-calendar4-week me-2"></i>Plan: @Model.RutinaActual.Nombre
+                        </h6>
+                        <span class="small text-white-50">Socio: @Model.RutinaActual.Cliente (Folio: @Model.RutinaActual.Folio)</span>
+                    </div>
+                    @if (Model.PuedeEditar && Model.RutinaActual.IdEstatus == 1)
+                    {
+                        <button type="button" class="btn btn-outline-light btn-sm py-0 px-2 me-1"
+                                data-bs-toggle="modal" data-bs-target="#modalEditarRutina"
+                                onclick="document.getElementById('hidIdRutinaModificar').value='@Model.RutinaActual.IdRutina';
+                                         document.getElementById('inpNombreRutinaModificar').value=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RutinaActual.Nombre));
+                                         document.getElementById('inpObjetivoRutinaModificar').value=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RutinaActual.Objetivo));">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    }
+                    <a asp-page="/Rutinas/Index"
+                       asp-route-FiltroCliente="@Model.FiltroCliente"
+                       asp-route-FiltroEmpleado="@Model.FiltroEmpleado"
+                       asp-route-FiltroEstatus="@Model.FiltroEstatus"
+                       class="btn btn-outline-light btn-sm py-0 px-2">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-2 mb-3 pb-3 border-bottom align-items-center">
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Entrenador Responsable</span>
+                            <span class="fw-semibold">@Model.RutinaActual.Entrenador</span>
+                            <div class="small text-muted">Asignada el: @Model.RutinaActual.FechaAsignacion.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <span class="text-muted small d-block">Estatus de Rutina</span>
+                            <span class="badge @(Model.RutinaActual.IdEstatus == 1 ? "bg-dark" : "bg-secondary") fs-6 px-3 py-1">
+                                @Model.RutinaActual.Estatus
+                            </span>
+
+                            @if (Model.PuedeEditar && Model.RutinaActual.IdEstatus == 1)
+                            {
+                                <div class="mt-2">
+                                    <form method="post" asp-page-handler="CambiarEstatus" class="d-inline">
+                                        <input type="hidden" name="IdRutinaEstatus" value="@Model.RutinaActual.IdRutina" />
+                                        <input type="hidden" name="NuevoEstatus" value="2" />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2 me-1"
+                                                onclick="return confirm('¿Marcar rutina como finalizada?');">
+                                            Finalizar
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-page-handler="CambiarEstatus" class="d-inline">
+                                        <input type="hidden" name="IdRutinaEstatus" value="@Model.RutinaActual.IdRutina" />
+                                        <input type="hidden" name="NuevoEstatus" value="3" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2"
+                                                onclick="return confirm('¿Suspender esta rutina?');">
+                                            Suspender
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-12 mt-2">
+                            <span class="text-muted small d-block">Objetivo del Entrenamiento</span>
+                            <div class="bg-light p-2 rounded small border text-dark">
+                                @Model.RutinaActual.Objetivo
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Listado de Ejercicios por Día de la Semana -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-list-ol me-1"></i>Ejercicios Asignados (@Model.DetallesActuales.Count)
+                        </h6>
+                    </div>
+
+                    @if (Model.DetallesActuales.Count == 0)
+                    {
+                        <div class="alert alert-secondary small text-center my-3" role="alert">
+                            <i class="bi bi-info-circle me-1"></i>No hay ejercicios agregados a esta rutina aún. Utiliza el formulario de abajo para armar el plan.
+                        </div>
+                    }
+                    else
+                    {
+                        @for (byte dia = 1; dia <= 7; dia++)
+                        {
+                            var ejerciciosDia = Model.DetallesActuales.Where(d => d.DiaSemana == dia).ToList();
+                            if (ejerciciosDia.Count > 0)
+                            {
+                                var nombreDia = dia switch { 1 => "Lunes", 2 => "Martes", 3 => "Miércoles", 4 => "Jueves", 5 => "Viernes", 6 => "Sábado", 7 => "Domingo", _ => $"Día {dia}" };
+                                <div class="card mb-3 border">
+                                    <div class="card-header bg-light py-2 px-3 fw-bold small text-dark d-flex justify-content-between">
+                                        <span><i class="bi bi-calendar-event me-2"></i>@nombreDia</span>
+                                        <span class="badge bg-dark">@ejerciciosDia.Count ejercicio(s)</span>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead class="small text-muted">
+                                                <tr>
+                                                    <th>Ejercicio</th>
+                                                    <th>Músculo / Dif.</th>
+                                                    <th class="text-center">Series</th>
+                                                    <th class="text-center">Reps</th>
+                                                    <th class="text-center">Descanso</th>
+                                                    @if (Model.PuedeEditar && Model.RutinaActual.IdEstatus == 1)
+                                                    {
+                                                        <th class="text-end">Quitar</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var ej in ejerciciosDia)
+                                                {
+                                                    <tr>
+                                                        <td class="fw-semibold small">@ej.Ejercicio</td>
+                                                        <td class="small text-muted">
+                                                            @ej.GrupoMuscular <span class="badge bg-light text-dark border">@ej.Dificultad</span>
+                                                        </td>
+                                                        <td class="text-center small">@ej.Series</td>
+                                                        <td class="text-center small">@ej.Repeticiones</td>
+                                                        <td class="text-center small text-muted">@ej.TiempoDescanso s</td>
+                                                        @if (Model.PuedeEditar && Model.RutinaActual.IdEstatus == 1)
+                                                        {
+                                                            <td class="text-end">
+                                                                <form method="post" asp-page-handler="QuitarEjercicio" class="d-inline">
+                                                                    <input type="hidden" name="IdRutinaQuitar" value="@Model.RutinaActual.IdRutina" />
+                                                                    <input type="hidden" name="IdDetalleQuitar" value="@ej.IdDetalleRutina" />
+                                                                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2"
+                                                                            title="Quitar ejercicio"
+                                                                            onclick="return confirm('¿Quitar este ejercicio del plan?');">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+
+                    <!-- Formulario para agregar ejercicio -->
+                    @if (Model.PuedeEditar && Model.RutinaActual.IdEstatus == 1)
+                    {
+                        <div class="bg-light p-3 rounded border mt-3">
+                            <h6 class="fw-semibold text-dark small mb-2">
+                                <i class="bi bi-plus-circle me-1"></i>Agregar Ejercicio a la Rutina
+                            </h6>
+                            <form method="post" asp-page-handler="AgregarEjercicio">
+                                <input type="hidden" asp-for="IdRutinaEjercicio" value="@Model.RutinaActual.IdRutina" />
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Día de la Semana *</label>
+                                        <select asp-for="DiaSemana" class="form-select form-select-sm" required>
+                                            <option value="1">Lunes</option>
+                                            <option value="2">Martes</option>
+                                            <option value="3">Miércoles</option>
+                                            <option value="4">Jueves</option>
+                                            <option value="5">Viernes</option>
+                                            <option value="6">Sábado</option>
+                                            <option value="7">Domingo</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label small fw-semibold">Ejercicio *</label>
+                                        <select asp-for="IdEjercicio" class="form-select form-select-sm" required>
+                                            <option value="">-- Selecciona ejercicio --</option>
+                                            @foreach (var cat in Model.CatalogoEjercicios)
+                                            {
+                                                <option value="@cat.IdEjercicio">@cat.Nombre [@cat.GrupoMuscular - @cat.Dificultad]</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Series *</label>
+                                        <input asp-for="Series" type="number" min="1" max="20" class="form-control form-control-sm" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Repeticiones *</label>
+                                        <input asp-for="Repeticiones" type="text" class="form-control form-control-sm" placeholder="Ej. 12 o 10-12" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Descanso (segundos) *</label>
+                                        <input asp-for="TiempoDescanso" type="number" min="10" max="600" step="5" class="form-control form-control-sm" required />
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input asp-for="IgnorarContraindicacion" class="form-check-input" type="checkbox" id="chkIgnorar" />
+                                    <label class="form-check-label small text-muted" for="chkIgnorar">
+                                        Ignorar advertencia de contraindicación médica del socio (requiere criterio profesional del instructor).
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-dark btn-sm w-100">
+                                    <i class="bi bi-plus-lg me-1"></i>Guardar Ejercicio en Plan
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal: Editar Rutina -->
+<div class="modal fade" id="modalEditarRutina" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Modificar">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Plan de Entrenamiento</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="IdRutinaModificar" id="hidIdRutinaModificar" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre de la Rutina *</label>
+                        <input asp-for="NombreRutinaModificar" id="inpNombreRutinaModificar" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Objetivo del Entrenamiento *</label>
+                        <textarea asp-for="ObjetivoRutinaModificar" id="inpObjetivoRutinaModificar" class="form-control form-control-sm" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-check-lg me-1"></i>Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Nueva Rutina -->
+<div class="modal fade" id="modalNuevaRutina" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Crear">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold"><i class="bi bi-journal-plus me-2"></i>Crear Plan de Entrenamiento</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre de la Rutina *</label>
+                        <input asp-for="NombreRutina" class="form-control form-control-sm" placeholder="Ej. Hipertrofia Torso-Pierna, Acondicionamiento Inicial" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Socio Destinatario *</label>
+                        <select asp-for="IdClienteRutina" class="form-select form-select-sm" required>
+                            <option value="">-- Selecciona socio --</option>
+                            @if (Model.Socios != null)
+                            {
+                                foreach (System.Data.DataRow s in Model.Socios.Rows)
+                                {
+                                    <option value="@s["IdCliente"]">[@s["Folio"]] @s["Nombres"] @s["PrimerApellido"]</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Entrenador Responsable *</label>
+                        <select asp-for="IdEmpleadoRutina" class="form-select form-select-sm" required>
+                            <option value="">-- Selecciona instructor --</option>
+                            @if (Model.Empleados != null)
+                            {
+                                foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                                {
+                                    <option value="@emp["IdEmpleado"]">@emp["Nombres"] @emp["PrimerApellido"] [@emp["Puesto"]]</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Fecha de Asignación *</label>
+                        <input asp-for="FechaAsignacionRutina" type="date" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Objetivo del Entrenamiento *</label>
+                        <textarea asp-for="ObjetivoRutina" class="form-control form-control-sm" rows="3" placeholder="Ej. Pérdida de grasa y tonificación muscular durante 8 semanas..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-check-lg me-1"></i>Crear Rutina</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
