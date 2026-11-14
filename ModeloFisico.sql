@@ -859,7 +859,7 @@ VALUES
     (2, 3, '15',    45, 3, 6),  -- Martes: Plancha
     (5, 3, '12',    60, 3, 4),  -- Viernes: Curl bíceps
     (5, 3, '12',    60, 3, 10); -- Viernes: Remo con barra
-
+GO
 -------------------------------------------------------------
 -- 7. PROCEDIMIENTOS ALMACENADOS DE CATÁLOGOS BASE
 -------------------------------------------------------------

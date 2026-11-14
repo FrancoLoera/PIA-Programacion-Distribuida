@@ -24,8 +24,68 @@ body {
 }
 
 /* Minimalist Card & Table Styles */
+.hero {
+    color: white;
+    background-image: url('../images/Hero mamadriguera.png');
+    height: 300px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.hero-title {
+    border-left: 4px solid #AAA;
+}
+
+.hero-title small {
+    color: #AAA;
+}
+
 .card {
-  border-color: #e9ecef;
+    border-color: #e9ecef;
+    transition: 0.3s ease-in;
+}
+
+.card-item {
+    transition: 0.3s ease-in;
+}
+
+.card-item:hover {
+    background-color: #222;
+    transform: translateY(-3px);
+}
+
+.card-item:hover .card-icon {
+    background-color: white;
+    color: #222;
+}
+
+.card-item:hover .card-title {
+    color: white;
+}
+
+.card-item:hover .card-text {
+    color: white;
+}
+
+.card-item:hover .btn {
+    color: white;
+    border-color: white;
+}
+
+.card-item:hover .btn:hover {
+    background-color: white;
+    color: #222;
+    border-color: white;
+}
+
+.card-icon {
+    font-size: 2rem;
+    background-color: #222;
+    color: white;
+    border-radius: 50px;
+    padding: 8px 15px;
+    transition: 0.3s ease-in;
 }
 
 .table th {

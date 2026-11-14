@@ -9,9 +9,16 @@
 
 <div class="row mb-4">
     <div class="col-12">
-        <div class="p-4 bg-white rounded border shadow-sm">
-            <h3 class="fw-bold text-dark mb-1">Bienvenido, @nombre</h3>
-            <p class="text-muted mb-0 small">Rol: <strong>@rol</strong> | Sucursal: <strong>@sucursal</strong></p>
+        <div class="hero d-flex flex-column justify-content-center p-5 rounded border shadow-sm">
+            <div class="hero-title d-flex flex-column mb-3 ps-3">
+                <h3 class="mb-1"><small>Bienvenido,</small></h3>
+                <h3 class="fw-bold">@nombre.ToUpper()</h3>
+            </div>
+            
+            <div class="d-flex ps-3">
+                <p class="mb-0 me-3 d-flex align-items-center"><i class="bi bi-person-vcard-fill fs-3 me-2"></i>Rol: <strong class="ms-1">@rol</strong></p>
+                <p class="mb-0 d-flex align-items-center"><i class="bi bi-building-fill fs-3 me-2"></i></i>Sucursal: <strong class="ms-1">@sucursal</strong></p>
+            </div>
         </div>
     </div>
 </div>
@@ -20,12 +27,13 @@
     @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista"))
     {
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 p-2 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-people me-2"></i>Gestión de Socios
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-people-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Gestión de Socios</h5>
+                    </div>
+                    <p class="card-text small">
                         Registro de nuevos socios, consulta de folios, actualización de información y control de estatus.
                     </p>
                     <a asp-page="/Clientes/Index" class="btn btn-outline-dark btn-sm">
@@ -36,12 +44,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 p-2 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-person-check me-2"></i>Membresías
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-person-check-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Membresías</h5>
+                    </div>
+
+                    <p class="card-text small">
                         Asignación de planes a socios, cálculo de vigencias mensuales y control de suscripciones.
                     </p>
                     <a asp-page="/Membresias/Index" class="btn btn-outline-dark btn-sm">
@@ -52,12 +62,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-shield-check me-2"></i>Control de Acceso
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-shield-fill-check mb-3"></i>
+                        <h5 class="card-title fw-bold">Control de Acceso</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Validación y registro de entrada y salida de socios en recepción verificando membresía activa.
                     </p>
                     <a asp-page="/ControlAcceso/Index" class="btn btn-outline-dark btn-sm">
@@ -71,12 +83,14 @@
     @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista") || User.IsInRole("Entrenador"))
     {
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-calendar3 me-2"></i>Clases y Horarios
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-calendar3-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Clases y horarios</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Programación de clases grupales, consulta de cartelera, asignación de instructores y cupos.
                     </p>
                     <a asp-page="/Clases/Index" class="btn btn-outline-dark btn-sm">
@@ -87,12 +101,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-card-checklist me-2"></i>Reservas y Asistencia
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-ui-checks mb-3"></i>
+                        <h5 class="card-title fw-bold">Reservas y asistencia</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Inscripción de socios a clases según su membresía y registro de asistencia / pase de lista.
                     </p>
                     <a asp-page="/Reservas/Index" class="btn btn-outline-dark btn-sm">
@@ -103,12 +119,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-file-medical me-2"></i>Expedientes Médicos
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-file-medical-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Expedientes médicos</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Ficha médica de socios: registro de tipo de sangre y control de condiciones médicas o alergias.
                     </p>
                     <a asp-page="/Expedientes/Index" class="btn btn-outline-dark btn-sm">
@@ -119,12 +137,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-person-walking me-2"></i>Rutinas de Entrenamiento
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-person-walking mb-3"></i>
+                        <h5 class="card-title fw-bold">Rutinas de entrenamiento</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Planes semanales de ejercicios, control de objetivos y validación de contraindicaciones médicas.
                     </p>
                     <a asp-page="/Rutinas/Index" class="btn btn-outline-dark btn-sm">
@@ -135,12 +155,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Reportes Oficiales
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-file-earmark-bar-graph-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Reportes oficiales</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Consultas y estadísticas de socios, torniquetes, asistencia de clases grupales y personal.
                     </p>
                     <a asp-page="/Reportes/Index" class="btn btn-outline-dark btn-sm">
@@ -154,12 +176,14 @@
     @if (User.IsInRole("Administrador"))
     {
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-person-badge me-2"></i>Empleados
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-person-badge-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Empleados</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Administración de personal del gimnasio, asignación de puestos laborales y sucursales.
                     </p>
                     <a asp-page="/Empleados/Index" class="btn btn-outline-dark btn-sm">
@@ -169,12 +193,14 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-building me-2"></i>Sucursales
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-building-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Sucursales</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Administración de sedes de la cadena de gimnasios, ubicación y estatus de operación.
                     </p>
                     <a asp-page="/Sucursales/Index" class="btn btn-outline-dark btn-sm">
@@ -185,12 +211,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-people me-2"></i>Cuentas de Usuario
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-people-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Usuarios</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Administración de cuentas de acceso para operadores, asignación de roles y cambio de contraseñas.
                     </p>
                     <a asp-page="/Usuarios/Index" class="btn btn-outline-dark btn-sm">
@@ -200,12 +228,14 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-door-open me-2"></i>Salones
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-door-open-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Salones</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Espacios físicos y salas de entrenamiento acondicionadas para clases y actividades.
                     </p>
                     <a asp-page="/Salones/Index" class="btn btn-outline-dark btn-sm">
@@ -216,12 +246,14 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card h-100 border shadow-sm">
+            <div class="card card-item h-100 border shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">
-                        <i class="bi bi-clock-history me-2"></i>Bitácora de Auditoría
-                    </h5>
-                    <p class="card-text text-muted small">
+                    <div class="d-flex flex-column align-items-start">
+                        <i class="card-icon bi bi-folder-fill mb-3"></i>
+                        <h5 class="card-title fw-bold">Bitácora de auditoría</h5>
+                    </div>
+
+                    <p class="card-text  small">
                         Registro histórico inmutable de operaciones (altas, bajas y cambios) con trazabilidad JSON.
                     </p>
                     <a asp-page="/Auditoria/Index" class="btn btn-outline-dark btn-sm">
