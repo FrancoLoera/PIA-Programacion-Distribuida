@@ -12,62 +12,72 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-semibold text-white" asp-page="/Index"><img src="images/Mamadriguera White.png" width=100/></a>
+                <a class="navbar-brand fw-semibold text-white" asp-page="/Index"><img src="~/images/Mamadriguera White.png" width="100" alt="Mamadriguera" /></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido"
                         aria-controls="navbarContenido" aria-expanded="false" aria-label="Navegación">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarContenido">
+                    @{
+                        var esAdmin = User.IsInRole("Administrador");
+                        var esRecepcion = User.IsInRole("Recepcionista");
+                        var esEntrenador = User.IsInRole("Entrenador");
+                    }
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-page="/Index">Inicio</a>
                         </li>
-                        @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista"))
+                        @if (esAdmin || esRecepcion || esEntrenador)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Clientes/Index">Socios</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Socios</a>
+                                <ul class="dropdown-menu dropdown-menu-dark shadow">
+                                    @if (esAdmin || esRecepcion)
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/Clientes/Index"><i class="bi bi-people me-2"></i>Socios</a></li>
+                                    }
+                                    <li><a class="dropdown-item" asp-page="/Expedientes/Index"><i class="bi bi-file-medical me-2"></i>Expedientes médicos</a></li>
+                                    @if (esAdmin || esRecepcion)
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/Membresias/Index"><i class="bi bi-person-check me-2"></i>Membresías</a></li>
+                                    }
+                                    @if (esAdmin)
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/Membresias/Planes"><i class="bi bi-card-list me-2"></i>Tipos de membresía</a></li>
+                                    }
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Membresias/Index">Membresías</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/ControlAcceso/Index">Acceso</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Operación</a>
+                                <ul class="dropdown-menu dropdown-menu-dark shadow">
+                                    @if (esAdmin || esRecepcion)
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/ControlAcceso/Index"><i class="bi bi-door-open me-2"></i>Control de acceso</a></li>
+                                    }
+                                    <li><a class="dropdown-item" asp-page="/Clases/Index"><i class="bi bi-calendar3 me-2"></i>Clases</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Reservas/Index"><i class="bi bi-card-checklist me-2"></i>Reservas y asistencia</a></li>
+                                    @if (esAdmin || esEntrenador)
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/Rutinas/Index"><i class="bi bi-person-walking me-2"></i>Rutinas</a></li>
+                                    }
+                                </ul>
                             </li>
                         }
-                        @if (User.IsInRole("Administrador") || User.IsInRole("Recepcionista") || User.IsInRole("Entrenador"))
+                        @if (esAdmin)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Clases/Index">Clases</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Reservas/Index">Reservas</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Expedientes/Index">Expedientes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Rutinas/Index">Rutinas</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white-50" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administración</a>
+                                <ul class="dropdown-menu dropdown-menu-dark shadow">
+                                    <li><a class="dropdown-item" asp-page="/Empleados/Index"><i class="bi bi-person-badge me-2"></i>Empleados</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Sucursales/Index"><i class="bi bi-building me-2"></i>Sucursales</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Salones/Index"><i class="bi bi-door-closed me-2"></i>Salones</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-page="/Usuarios/Index"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Auditoria/Index"><i class="bi bi-journal-text me-2"></i>Auditoría</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-white-50" asp-page="/Reportes/Index">Reportes</a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Sucursales/Index">Sucursales</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Salones/Index">Salones</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Empleados/Index">Empleados</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Usuarios/Index">Usuarios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50" asp-page="/Auditoria/Index">Auditoría</a>
                             </li>
                         }
                     </ul>
@@ -78,22 +88,22 @@
                         var rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
                         var sucursal = User.FindFirst("Sucursal")?.Value;
 
-                        <div class="d-flex align-items-center">
-                            <span class="me-3 small text-white-50">
-                                <span class="text-white">@nombreUsuario</span>
-                                @if (!string.IsNullOrEmpty(rol))
-                                {
-                                    <span>(@rol)</span>
-                                }
-                                @if (!string.IsNullOrEmpty(sucursal))
-                                {
-                                    <span> - @sucursal</span>
-                                }
-                            </span>
-                            <a asp-page="/Logout" class="btn btn-sm btn-outline-light">
-                                <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
-                            </a>
-                        </div>
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i>@nombreUsuario
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                    <li><span class="dropdown-item-text small text-white-50">@rol</span></li>
+                                    @if (!string.IsNullOrEmpty(sucursal))
+                                    {
+                                        <li><span class="dropdown-item-text small text-white-50">@sucursal</span></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-page="/Logout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
+                                </ul>
+                            </li>
+                        </ul>
                     }
                 </div>
             </div>

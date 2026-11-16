@@ -10,7 +10,7 @@ using PIA_Gimnasio.Logica;
 
 namespace PIA_Gimnasio.Pages.Rutinas
 {
-    [Authorize(Roles = "Administrador,Recepcionista,Entrenador")]
+    [Authorize(Roles = "Administrador,Entrenador")]
     public class IndexModel : PageModel
     {
         private readonly logicaRutina _logicaRutina;
@@ -128,6 +128,9 @@ namespace PIA_Gimnasio.Pages.Rutinas
 
         public IActionResult OnPostCrear()
         {
+            if (EsEntrenador)
+                IdEmpleadoRutina = ObtenerIdEmpleado();
+
             if (string.IsNullOrWhiteSpace(NombreRutina) || string.IsNullOrWhiteSpace(ObjetivoRutina)
                 || IdClienteRutina <= 0 || IdEmpleadoRutina <= 0)
             {
@@ -144,6 +147,9 @@ namespace PIA_Gimnasio.Pages.Rutinas
 
         public IActionResult OnPostModificar()
         {
+            if (!EsRutinaPropia(IdRutinaModificar))
+                return Forbid();
+
             if (IdRutinaModificar <= 0 || string.IsNullOrWhiteSpace(NombreRutinaModificar) || string.IsNullOrWhiteSpace(ObjetivoRutinaModificar))
             {
                 TipoMensaje = "warning";
@@ -159,6 +165,9 @@ namespace PIA_Gimnasio.Pages.Rutinas
 
         public IActionResult OnPostCambiarEstatus()
         {
+            if (!EsRutinaPropia(IdRutinaEstatus))
+                return Forbid();
+
             if (IdRutinaEstatus <= 0 || NuevoEstatus <= 0)
             {
                 TipoMensaje = "warning";
@@ -174,6 +183,9 @@ namespace PIA_Gimnasio.Pages.Rutinas
 
         public IActionResult OnPostAgregarEjercicio()
         {
+            if (!EsRutinaPropia(IdRutinaEjercicio))
+                return Forbid();
+
             if (IdRutinaEjercicio <= 0 || IdEjercicio <= 0 || DiaSemana < 1 || DiaSemana > 7 || Series <= 0 || string.IsNullOrWhiteSpace(Repeticiones))
             {
                 TipoMensaje = "warning";
@@ -199,6 +211,9 @@ namespace PIA_Gimnasio.Pages.Rutinas
 
         public IActionResult OnPostQuitarEjercicio()
         {
+            if (!EsRutinaPropia(IdRutinaQuitar) || !_logicaRutina.ListarDetalles(IdRutinaQuitar).Exists(d => d.IdDetalleRutina == IdDetalleQuitar))
+                return Forbid();
+
             if (IdDetalleQuitar <= 0 || IdRutinaQuitar <= 0)
             {
                 TipoMensaje = "warning";
@@ -215,23 +230,22 @@ namespace PIA_Gimnasio.Pages.Rutinas
         private void CargarDatos()
         {
             int? idEmpleadoFiltro = FiltroEmpleado;
-            if (EsEntrenador && !idEmpleadoFiltro.HasValue)
+            if (EsEntrenador)
             {
-                // Si es entrenador y no eligió filtro, podemos sugerir su id
-                var empId = ObtenerIdEmpleado();
-                if (empId > 0 && IdEmpleadoRutina == 0)
-                {
-                    IdEmpleadoRutina = empId;
-                }
+                idEmpleadoFiltro = ObtenerIdEmpleado();
+                FiltroEmpleado = idEmpleadoFiltro;
+                IdEmpleadoRutina = idEmpleadoFiltro.Value;
             }
 
             Rutinas = _logicaRutina.Consultar(FiltroCliente, idEmpleadoFiltro, FiltroEstatus, FiltroNombre);
             AlertasMedicas = _logicaRutina.ConsultarAlertas();
+            if (EsEntrenador)
+                AlertasMedicas = AlertasMedicas.FindAll(a => a.IdEmpleado == idEmpleadoFiltro);
             CatalogoEjercicios = _logicaRutina.ConsultarEjercicios();
             Socios = _logicaCliente.Consultar(null, null, 1);
-            Empleados = _logicaEmpleado.Consultar(null, null, 1);
+            Empleados = _logicaEmpleado.Consultar(null, 2, 1);
 
-            if (RutinaDetalle.HasValue && RutinaDetalle > 0)
+            if (RutinaDetalle.HasValue && RutinaDetalle > 0 && EsRutinaPropia(RutinaDetalle.Value))
             {
                 RutinaActual = _logicaRutina.ObtenerPorId(RutinaDetalle.Value);
                 if (RutinaActual != null)
@@ -247,6 +261,14 @@ namespace PIA_Gimnasio.Pages.Rutinas
         {
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return int.TryParse(idClaim, out int id) ? id : 1;
+        }
+
+        private bool EsRutinaPropia(int idRutina)
+        {
+            if (!EsEntrenador)
+                return true;
+            var rutina = _logicaRutina.ObtenerPorId(idRutina);
+            return rutina != null && rutina.IdEmpleado == ObtenerIdEmpleado();
         }
 
         private int ObtenerIdEmpleado()

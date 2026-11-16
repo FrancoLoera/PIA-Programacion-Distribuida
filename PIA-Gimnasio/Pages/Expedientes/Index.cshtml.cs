@@ -84,7 +84,9 @@ namespace PIA_Gimnasio.Pages.Expedientes
         [TempData]
         public string TipoMensaje { get; set; } = "";
 
-        public bool PuedeEditar => User.IsInRole("Administrador") || User.IsInRole("Entrenador");
+        public bool PuedeEditar => User.IsInRole("Administrador") || User.IsInRole("Recepcionista");
+        public bool EsAdministrador => User.IsInRole("Administrador");
+        public bool EsEntrenador => User.IsInRole("Entrenador");
 
         public void OnGet()
         {
@@ -93,6 +95,9 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         public IActionResult OnPostCrear()
         {
+            if (!PuedeEditar)
+                return Forbid();
+
             if (IdClienteNuevo <= 0 || string.IsNullOrWhiteSpace(TipoSangreNuevo))
             {
                 TipoMensaje = "warning";
@@ -108,6 +113,9 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         public IActionResult OnPostActualizarTipo()
         {
+            if (!PuedeEditar)
+                return Forbid();
+
             if (IdExpedienteEditar <= 0 || string.IsNullOrWhiteSpace(TipoSangreEditar))
             {
                 TipoMensaje = "warning";
@@ -123,6 +131,9 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         public IActionResult OnPostAsociarCondicion()
         {
+            if (!PuedeEditar)
+                return Forbid();
+
             if (IdExpedienteCondicion <= 0 || IdCondicionAsociar <= 0)
             {
                 TipoMensaje = "warning";
@@ -138,6 +149,9 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         public IActionResult OnPostDesvincularCondicion()
         {
+            if (!PuedeEditar)
+                return Forbid();
+
             if (IdExpedienteDesvincular <= 0 || IdCondicionDesvincular <= 0)
             {
                 TipoMensaje = "warning";
@@ -153,10 +167,14 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         public IActionResult OnPostNuevaCondicionCatalogo()
         {
-            if (string.IsNullOrWhiteSpace(NombreCondicionCatalogo) || string.IsNullOrWhiteSpace(TipoCondicionCatalogo))
+            if (!EsAdministrador)
+                return Forbid();
+
+            if (string.IsNullOrWhiteSpace(NombreCondicionCatalogo) || string.IsNullOrWhiteSpace(TipoCondicionCatalogo)
+                || string.IsNullOrWhiteSpace(DescripcionCondicionCatalogo))
             {
                 TipoMensaje = "warning";
-                Mensaje = "El nombre y tipo de condición son obligatorios.";
+                Mensaje = "El nombre, el tipo y la descripción de la condición son obligatorios.";
                 return RedirectToPage(new { ExpedienteDetalle });
             }
 
@@ -168,9 +186,23 @@ namespace PIA_Gimnasio.Pages.Expedientes
 
         private void CargarDatos()
         {
-            Expedientes = _logicaExpediente.Consultar(FiltroCliente, FiltroTipoSangre);
+            int? idEntrenador = EsEntrenador ? ObtenerIdEmpleado() : null;
+            Expedientes = _logicaExpediente.Consultar(FiltroCliente, FiltroTipoSangre, idEntrenador);
             CatalogoCondiciones = _logicaExpediente.CatalogoCondiciones();
             Socios = _logicaCliente.Consultar();
+
+            if (EsEntrenador)
+            {
+                var permitidos = _logicaExpediente.Consultar(null, null, idEntrenador);
+                var idsSocios = permitidos.ConvertAll(e => e.IdCliente);
+                foreach (DataRow fila in Socios.Select())
+                {
+                    if (!idsSocios.Contains(Convert.ToInt32(fila["IdCliente"])))
+                        Socios.Rows.Remove(fila);
+                }
+                if (ExpedienteDetalle.HasValue && !permitidos.Exists(e => e.IdExpediente == ExpedienteDetalle.Value))
+                    ExpedienteDetalle = null;
+            }
 
             if (ExpedienteDetalle.HasValue && ExpedienteDetalle > 0)
             {
@@ -186,6 +218,12 @@ namespace PIA_Gimnasio.Pages.Expedientes
         {
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return int.TryParse(idClaim, out int id) ? id : 1;
+        }
+
+        private int ObtenerIdEmpleado()
+        {
+            var idClaim = User.FindFirst("IdEmpleado")?.Value;
+            return int.TryParse(idClaim, out int id) ? id : 0;
         }
     }
 }

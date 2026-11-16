@@ -50,7 +50,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Clase.Fecha" class="form-label small fw-semibold">Fecha *</label>
-                            <input asp-for="Clase.Fecha" type="date" class="form-control form-control-sm" required />
+                            <input asp-for="Clase.Fecha" type="date" class="form-control form-control-sm" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                             <div class="form-text small text-muted">Solo de lunes a viernes y dentro del horario de la sucursal del salón.</div>
                             <span asp-validation-for="Clase.Fecha" class="text-danger small"></span>
                         </div>
@@ -111,7 +111,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Clase.IdEspecialidad" class="form-label small fw-semibold">Especialidad Requerida</label>
+                            <label asp-for="Clase.IdEspecialidad" class="form-label small fw-semibold">Especialidad Sugerida</label>
                             <select asp-for="Clase.IdEspecialidad" class="form-select form-select-sm">
                                 <option value="">-- Ninguna (General) --</option>
                                 @if (Model.Especialidades != null)
@@ -194,8 +194,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th class="ps-3" style="width: 50px;">ID</th>
-                            <th>Clase</th>
+                            <th class="ps-3">Clase</th>
                             <th>Horario y Lugar</th>
                             <th>Instructor</th>
                             <th style="width: 100px;">Cupo</th>
@@ -210,7 +209,7 @@
                         @if (Model.Clases == null || Model.Clases.Rows.Count == 0)
                         {
                             <tr>
-                                <td colspan="@(Model.PuedeGestionar ? 7 : 6)" class="text-center text-muted py-4">
+                                <td colspan="@(Model.PuedeGestionar ? 6 : 5)" class="text-center text-muted py-4">
                                     <i class="bi bi-calendar-x d-block fs-3 mb-2"></i>
                                     No se encontraron clases programadas.
                                 </td>
@@ -243,8 +242,7 @@
                                 };
 
                                 <tr>
-                                    <td class="ps-3 fw-bold text-muted">@idC</td>
-                                    <td>
+                                    <td class="ps-3">
                                         <div class="fw-semibold text-dark">@nombre</div>
                                         @if (!string.IsNullOrEmpty(especialidad))
                                         {

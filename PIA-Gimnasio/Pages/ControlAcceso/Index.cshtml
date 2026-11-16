@@ -58,9 +58,9 @@
                         <label asp-for="IdSucursalAcceso" class="form-label small fw-semibold">Sucursal de Acceso *</label>
                         <select asp-for="IdSucursalAcceso" class="form-select form-select-sm" required>
                             <option value="">-- Selecciona sucursal --</option>
-                            @if (Model.Sucursales != null)
+                            @if (Model.SucursalesActivas != null)
                             {
-                                foreach (System.Data.DataRow s in Model.Sucursales.Rows)
+                                foreach (System.Data.DataRow s in Model.SucursalesActivas.Rows)
                                 {
                                     var idSuc = s["IdSucursal"]?.ToString();
                                     var nomSuc = s["Nombre"]?.ToString();
@@ -125,8 +125,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th class="ps-3" style="width: 50px;">ID</th>
-                            <th>Socio</th>
+                            <th class="ps-3">Socio</th>
                             <th>Sucursal</th>
                             <th>Entrada</th>
                             <th>Salida</th>
@@ -138,7 +137,7 @@
                         @if (Model.Accesos == null || Model.Accesos.Rows.Count == 0)
                         {
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="6" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox d-block fs-3 mb-2"></i>
                                     No hay registros de acceso en el período seleccionado.
                                 </td>
@@ -148,7 +147,6 @@
                         {
                             foreach (System.Data.DataRow row in Model.Accesos.Rows)
                             {
-                                var idAcceso = Convert.ToInt32(row["IdControlAcceso"]);
                                 var idCli = Convert.ToInt32(row["IdCliente"]);
                                 var folio = row["Folio"]?.ToString() ?? "";
                                 var cliente = row["Cliente"]?.ToString() ?? "";
@@ -160,8 +158,7 @@
                                 var esPendiente = row["FechaHoraSalida"] == DBNull.Value;
 
                                 <tr>
-                                    <td class="ps-3 fw-bold text-muted">@idAcceso</td>
-                                    <td>
+                                    <td class="ps-3">
                                         <div class="fw-semibold text-dark">@cliente</div>
                                         <small class="text-muted"><i class="bi bi-tag me-1"></i>@folio</small>
                                     </td>

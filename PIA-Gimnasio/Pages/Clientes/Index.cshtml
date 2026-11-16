@@ -60,7 +60,7 @@
                 </div>
                 <div class="col-md-3">
                     <label asp-for="Cliente.FechaNacimiento" class="form-label small fw-semibold">Fecha de nacimiento *</label>
-                    <input asp-for="Cliente.FechaNacimiento" type="date" class="form-control" required />
+                    <input asp-for="Cliente.FechaNacimiento" type="date" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                     <span asp-validation-for="Cliente.FechaNacimiento" class="text-danger small"></span>
                 </div>
                 <div class="col-md-3">
@@ -223,11 +223,14 @@
                                 }
                             </td>
                             <td class="text-end pe-3">
-                                <a asp-page-handler="Editar" asp-route-id="@id" class="btn btn-sm btn-outline-dark">
-                                    <i class="bi bi-pencil me-1"></i>Editar
-                                </a>
-
                                 @if (idEstatus == 1 || idEstatus == 4)
+                                {
+                                    <a asp-page-handler="Editar" asp-route-id="@id" class="btn btn-sm btn-outline-dark">
+                                        <i class="bi bi-pencil me-1"></i>Editar
+                                    </a>
+                                }
+
+                                @if ((idEstatus == 1 || idEstatus == 4) && User.IsInRole("Administrador"))
                                 {
                                     <form method="post" asp-page-handler="Baja" asp-route-id="@id" class="d-inline"
                                           onsubmit="return confirm('¿Dar de baja a este socio? Se cancelarán sus reservas futuras y se conservará su historial.');">
@@ -236,7 +239,7 @@
                                         </button>
                                     </form>
                                 }
-                                else
+                                else if (idEstatus == 2 || idEstatus == 3)
                                 {
                                     <form method="post" asp-page-handler="Reactivar" asp-route-id="@id" class="d-inline"
                                           onsubmit="return confirm('¿Desea reactivar a este socio?');">

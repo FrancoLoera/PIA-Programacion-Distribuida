@@ -102,21 +102,24 @@
                     }
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Entrenador</label>
-                <select name="FiltroEmpleado" class="form-select form-select-sm">
-                    <option value="">-- Todos los instructores --</option>
-                    @if (Model.Empleados != null)
-                    {
-                        foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+            @if (!Model.EsEntrenador)
+            {
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Entrenador</label>
+                    <select name="FiltroEmpleado" class="form-select form-select-sm">
+                        <option value="">-- Todos los entrenadores --</option>
+                        @if (Model.Empleados != null)
                         {
-                            var id = Convert.ToInt32(emp["IdEmpleado"]);
-                            var sel = Model.FiltroEmpleado == id ? "selected" : null;
-                            <option value="@id" selected="@sel">@emp["Nombres"] @emp["PrimerApellido"]</option>
+                            foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                            {
+                                var id = Convert.ToInt32(emp["IdEmpleado"]);
+                                var sel = Model.FiltroEmpleado == id ? "selected" : null;
+                                <option value="@id" selected="@sel">@emp["Nombres"] @emp["PrimerApellido"]</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
+                    </select>
+                </div>
+            }
             <div class="col-md-2">
                 <label class="form-label small fw-semibold">Estatus</label>
                 <select name="FiltroEstatus" class="form-select form-select-sm">
@@ -487,19 +490,22 @@
                             }
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Entrenador Responsable *</label>
-                        <select asp-for="IdEmpleadoRutina" class="form-select form-select-sm" required>
-                            <option value="">-- Selecciona instructor --</option>
-                            @if (Model.Empleados != null)
-                            {
-                                foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                    @if (!Model.EsEntrenador)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Entrenador Responsable *</label>
+                            <select asp-for="IdEmpleadoRutina" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona entrenador --</option>
+                                @if (Model.Empleados != null)
                                 {
-                                    <option value="@emp["IdEmpleado"]">@emp["Nombres"] @emp["PrimerApellido"] [@emp["Puesto"]]</option>
+                                    foreach (System.Data.DataRow emp in Model.Empleados.Rows)
+                                    {
+                                        <option value="@emp["IdEmpleado"]">@emp["Nombres"] @emp["PrimerApellido"]</option>
+                                    }
                                 }
-                            }
-                        </select>
-                    </div>
+                            </select>
+                        </div>
+                    }
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Fecha de Asignación *</label>
                         <input asp-for="FechaAsignacionRutina" type="date" class="form-control form-control-sm" required />

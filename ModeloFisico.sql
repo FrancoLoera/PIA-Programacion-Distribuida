@@ -739,12 +739,12 @@ VALUES
 -- ============================================================
 INSERT INTO dbo.SUSCRIPCION (FechaInicio, IdCliente, IdMembresia, IdEstatus)
 VALUES
-    ('2025-10-01', 1, 3, 2),  -- Andrés: Oro (Activa)
-    ('2025-10-15', 2, 2, 2),  -- Mariana: Plata (Activa)
-    ('2025-09-01', 3, 1, 3),  -- Roberto: Bronce (Vencida)
-    ('2025-11-01', 4, 2, 2),  -- Fernanda: Plata (Activa)
-    ('2025-10-10', 5, 3, 2),  -- Diego: Oro (Activa)
-    ('2025-10-20', 6, 1, 2);  -- Valentina: Bronce (Activa)
+    (DATEADD(DAY, -20, CAST(GETDATE() AS DATE)), 1, 3, 2),  -- Andrés: Oro (Activa)
+    (DATEADD(DAY, -10, CAST(GETDATE() AS DATE)), 2, 2, 2),  -- Mariana: Plata (Activa)
+    (DATEADD(MONTH, -3, CAST(GETDATE() AS DATE)), 3, 1, 3), -- Roberto: Bronce (Vencida)
+    (DATEADD(DAY, -5, CAST(GETDATE() AS DATE)), 4, 2, 2),   -- Fernanda: Plata (Activa)
+    (DATEADD(DAY, -15, CAST(GETDATE() AS DATE)), 5, 3, 2),  -- Diego: Oro (Activa)
+    (DATEADD(DAY, -25, CAST(GETDATE() AS DATE)), 6, 1, 2);  -- Valentina: Bronce (Activa)
 
 -- ============================================================
 -- EXPEDIENTES MÉDICOS
@@ -918,7 +918,7 @@ BEGIN
     BEGIN
         SELECT IdGrupoMuscular, Nombre, Descripcion
         FROM dbo.GRUPO_MUSCULAR
-        WHERE (@Nombre IS NULL OR Nombre LIKE '%' + TRIM(@Nombre) + '%')
+        WHERE (@Nombre IS NULL OR Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
         ORDER BY Nombre;
     END
 
@@ -1170,6 +1170,12 @@ BEGIN
 
     IF @Accion = 1 -- Insertar
     BEGIN
+        IF @Nombre IS NULL OR TRIM(@Nombre) = '' OR @Descripcion IS NULL OR TRIM(@Descripcion) = ''
+        BEGIN
+            SELECT 'El nombre y la descripción de la condición son obligatorios.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         IF @Tipo NOT IN ('Padecimiento', 'Lesión', 'Alergia', 'Riesgo')
         BEGIN
             SELECT 'El tipo de condición no es válido.' AS Mensaje, 'warning' AS TipoMensaje;
@@ -1202,7 +1208,7 @@ BEGIN
     BEGIN
         SELECT IdCondicion, Nombre, Tipo, Descripcion
         FROM dbo.CONDICION
-        WHERE (@Nombre IS NULL OR Nombre LIKE '%' + TRIM(@Nombre) + '%')
+        WHERE (@Nombre IS NULL OR Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
           AND (@Tipo IS NULL OR Tipo = @Tipo)
         ORDER BY Tipo, Nombre;
     END
@@ -1383,9 +1389,9 @@ BEGIN
                S.HoraApertura, S.HoraCierre, S.IdEstatus, E.Nombre AS Estatus
         FROM dbo.SUCURSAL S
         INNER JOIN dbo.ESTATUS_SUCURSAL E ON S.IdEstatus = E.IdEstatusSucursal
-        WHERE (@Nombre IS NULL OR S.Nombre LIKE '%' + TRIM(@Nombre) + '%')
-          AND (@Ciudad IS NULL OR S.Ciudad LIKE '%' + TRIM(@Ciudad) + '%')
-          AND (@Estado IS NULL OR S.Estado LIKE '%' + TRIM(@Estado) + '%')
+        WHERE (@Nombre IS NULL OR S.Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
+          AND (@Ciudad IS NULL OR S.Ciudad COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Ciudad) + '%')
+          AND (@Estado IS NULL OR S.Estado COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Estado) + '%')
           AND (@IdEstatus IS NULL OR S.IdEstatus = @IdEstatus)
         ORDER BY S.Nombre;
     END
@@ -1545,7 +1551,7 @@ BEGIN
         INNER JOIN dbo.ESTATUS_SALON E ON S.IdEstatus = E.IdEstatusSalon
         WHERE (@IdSucursal IS NULL OR S.IdSucursal = @IdSucursal)
           AND (@IdEstatus IS NULL OR S.IdEstatus = @IdEstatus)
-          AND (@NombreNumero IS NULL OR S.NombreNumero LIKE '%' + TRIM(@NombreNumero) + '%')
+          AND (@NombreNumero IS NULL OR S.NombreNumero COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@NombreNumero) + '%')
         ORDER BY Suc.Nombre, S.NombreNumero;
     END
 
@@ -1657,6 +1663,18 @@ BEGIN
             RETURN;
         END
 
+        IF @FechaNacimiento > CAST(GETDATE() AS DATE)
+        BEGIN
+            SELECT 'La fecha de nacimiento no puede ser posterior a la fecha actual.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF COALESCE(@FechaContratacion, CAST(GETDATE() AS DATE)) < @FechaNacimiento
+        BEGIN
+            SELECT 'La fecha de contratación no puede ser anterior a la fecha de nacimiento.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         -- Validar sucursal activa
         IF NOT EXISTS (SELECT 1 FROM dbo.SUCURSAL WHERE IdSucursal = @IdSucursal AND IdEstatus = 1)
         BEGIN
@@ -1743,9 +1761,12 @@ BEGIN
         INNER JOIN dbo.PUESTO P ON E.IdPuesto = P.IdPuesto
         INNER JOIN dbo.SUCURSAL S ON E.IdSucursal = S.IdSucursal
         INNER JOIN dbo.ESTATUS_EMPLEADO EE ON E.IdEstatus = EE.IdEstatusEmpleado
-        WHERE (@Nombres IS NULL OR E.Nombres LIKE '%' + TRIM(@Nombres) + '%'
-               OR E.PrimerApellido LIKE '%' + TRIM(@Nombres) + '%')
-          AND (@CURP IS NULL OR E.CURP LIKE '%' + TRIM(@CURP) + '%')
+        WHERE (@Nombres IS NULL
+               OR CONCAT(E.Nombres, ' ', E.PrimerApellido, ' ', E.SegundoApellido) COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR CONCAT(E.PrimerApellido, ' ', E.SegundoApellido, ' ', E.Nombres) COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR E.CURP COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR E.RFC COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%')
+          AND (@CURP IS NULL OR E.CURP COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@CURP) + '%')
           AND (@IdPuesto IS NULL OR E.IdPuesto = @IdPuesto)
           AND (@IdSucursal IS NULL OR E.IdSucursal = @IdSucursal)
           AND (@IdEstatus IS NULL OR E.IdEstatus = @IdEstatus)
@@ -1757,6 +1778,12 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado)
         BEGIN
             SELECT 'El empleado no existe.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF @FechaNacimiento > CAST(GETDATE() AS DATE)
+        BEGIN
+            SELECT 'La fecha de nacimiento no puede ser posterior a la fecha actual.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -1992,7 +2019,7 @@ BEGIN
         INNER JOIN dbo.EMPLEADO E ON U.IdEmpleado = E.IdEmpleado
         INNER JOIN dbo.SUCURSAL S ON E.IdSucursal = S.IdSucursal
         INNER JOIN dbo.ESTATUS_USUARIO EU ON U.IdEstatus = EU.IdEstatusUsuario
-        WHERE (@NombreCuenta IS NULL OR U.NombreCuenta LIKE '%' + TRIM(@NombreCuenta) + '%')
+        WHERE (@NombreCuenta IS NULL OR U.NombreCuenta COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@NombreCuenta) + '%')
           AND (@IdRol IS NULL OR U.IdRol = @IdRol)
           AND (@IdEstatus IS NULL OR U.IdEstatus = @IdEstatus)
         ORDER BY U.NombreCuenta;
@@ -2099,6 +2126,12 @@ BEGIN
             RETURN;
         END
 
+        IF @FechaNacimiento > CAST(GETDATE() AS DATE)
+        BEGIN
+            SELECT 'La fecha de nacimiento no puede ser posterior a la fecha actual.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         -- Validar sucursal activa
         IF NOT EXISTS (SELECT 1 FROM dbo.SUCURSAL WHERE IdSucursal = @IdSucursal AND IdEstatus = 1)
         BEGIN
@@ -2124,6 +2157,9 @@ BEGIN
         FROM dbo.CLIENTE WHERE IdCliente = @IdCliente;
     END
 
+    IF @Accion IN (2, 3)
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
     IF @Accion = 2 -- Consultar por Id
     BEGIN
         SELECT C.IdCliente, C.Folio, C.Nombres, C.PrimerApellido, C.SegundoApellido,
@@ -2145,11 +2181,15 @@ BEGIN
         FROM dbo.CLIENTE C
         INNER JOIN dbo.SUCURSAL S ON C.IdSucursal = S.IdSucursal
         INNER JOIN dbo.ESTATUS_CLIENTE E ON C.IdEstatus = E.IdEstatusCliente
-        WHERE (@Nombres IS NULL OR C.Nombres LIKE '%' + TRIM(@Nombres) + '%'
-               OR C.PrimerApellido LIKE '%' + TRIM(@Nombres) + '%')
-          AND (@Folio IS NULL OR C.Folio LIKE '%' + TRIM(@Folio) + '%')
-          AND (@Telefono IS NULL OR C.Telefono LIKE '%' + TRIM(@Telefono) + '%')
-          AND (@Correo IS NULL OR C.Correo LIKE '%' + TRIM(@Correo) + '%')
+        WHERE (@Nombres IS NULL
+               OR CONCAT(C.Nombres, ' ', C.PrimerApellido, ' ', C.SegundoApellido) COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR CONCAT(C.PrimerApellido, ' ', C.SegundoApellido, ' ', C.Nombres) COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR C.Folio COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR C.Correo COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%'
+               OR C.Telefono COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombres) + '%')
+          AND (@Folio IS NULL OR C.Folio COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Folio) + '%')
+          AND (@Telefono IS NULL OR C.Telefono COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Telefono) + '%')
+          AND (@Correo IS NULL OR C.Correo COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Correo) + '%')
           AND (@IdSucursal IS NULL OR C.IdSucursal = @IdSucursal)
           AND (@IdEstatus IS NULL OR C.IdEstatus = @IdEstatus)
         ORDER BY C.PrimerApellido, C.SegundoApellido, C.Nombres;
@@ -2163,9 +2203,21 @@ BEGIN
             RETURN;
         END
 
+        IF EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus IN (2, 3))
+        BEGIN
+            SELECT 'Un socio inactivo o suspendido no se puede editar. Primero reactívelo.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         IF @IdEstatus IN (1, 4) AND EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus <> @IdEstatus)
         BEGIN
             SELECT 'El estatus Activo o Pendiente no se asigna manualmente. Para reactivar al socio utilice el botón Reactivar.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF @FechaNacimiento > CAST(GETDATE() AS DATE)
+        BEGIN
+            SELECT 'La fecha de nacimiento no puede ser posterior a la fecha actual.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -2299,6 +2351,7 @@ CREATE OR ALTER PROCEDURE dbo.SP_EXPEDIENTE
     @TipoSangre     VARCHAR(3)      = NULL,
     @IdCondicion    TINYINT         = NULL,
     @Observaciones  VARCHAR(300)    = NULL,
+    @IdEmpleado     INT             = NULL,
     @IdUsuario      INT             = NULL
 )
 AS
@@ -2360,6 +2413,9 @@ BEGIN
         INNER JOIN dbo.CLIENTE C ON E.IdCliente = C.IdCliente
         WHERE (@IdCliente IS NULL OR E.IdCliente = @IdCliente)
           AND (@TipoSangre IS NULL OR E.TipoSangre = @TipoSangre)
+          AND (@IdEmpleado IS NULL OR EXISTS (
+                  SELECT 1 FROM dbo.RUTINA R WHERE R.IdCliente = E.IdCliente AND R.IdEmpleado = @IdEmpleado
+              ))
         ORDER BY C.PrimerApellido, C.SegundoApellido, C.Nombres;
     END
 
@@ -2531,7 +2587,7 @@ BEGIN
         FROM dbo.EJERCICIO E
         INNER JOIN dbo.GRUPO_MUSCULAR GM ON E.IdGrupoMuscular = GM.IdGrupoMuscular
         INNER JOIN dbo.DIFICULTAD D ON E.IdDificultad = D.IdDificultad
-        WHERE (@Nombre IS NULL OR E.Nombre LIKE '%' + TRIM(@Nombre) + '%')
+        WHERE (@Nombre IS NULL OR E.Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
           AND (@IdGrupoMuscular IS NULL OR E.IdGrupoMuscular = @IdGrupoMuscular)
           AND (@IdDificultad IS NULL OR E.IdDificultad = @IdDificultad)
         ORDER BY E.Nombre;
@@ -2758,6 +2814,7 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
 
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
         EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
 
         SELECT 'Suscripción actualizada correctamente.' AS Mensaje, 'success' AS TipoMensaje;
@@ -2781,15 +2838,30 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'BAJA', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
 
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
         SELECT 'Suscripción cancelada correctamente. Se conserva en el historial pero impide acceso inmediato.' AS Mensaje, 'success' AS TipoMensaje;
     END
 
     IF @Accion = 6
     BEGIN
         UPDATE dbo.SUSCRIPCION
+        SET IdEstatus = 3
+        WHERE IdEstatus = 2
+          AND FechaVencimiento < CAST(GETDATE() AS DATE);
+
+        UPDATE dbo.SUSCRIPCION
         SET IdEstatus = 2
         WHERE IdEstatus = 1
           AND FechaInicio <= CAST(GETDATE() AS DATE);
+
+        UPDATE dbo.CLIENTE
+        SET IdEstatus = 4
+        WHERE IdEstatus = 1
+          AND NOT EXISTS (
+              SELECT 1 FROM dbo.SUSCRIPCION S
+              WHERE S.IdCliente = CLIENTE.IdCliente AND S.IdEstatus IN (1, 2)
+          );
     END
 END;
 GO
@@ -3012,6 +3084,13 @@ BEGIN
             RETURN;
         END
 
+        IF @Fecha < CAST(GETDATE() AS DATE)
+           OR (@Fecha = CAST(GETDATE() AS DATE) AND @HoraInicio <= CAST(GETDATE() AS TIME))
+        BEGIN
+            SELECT 'No se pueden programar clases en una fecha u hora que ya pasó.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         IF DATEDIFF(DAY, '19000101', @Fecha) % 7 >= 5
         BEGIN
             SELECT 'Las clases solo pueden programarse de lunes a viernes.' AS Mensaje, 'warning' AS TipoMensaje;
@@ -3106,12 +3185,12 @@ BEGIN
         INNER JOIN dbo.EMPLEADO E ON C.IdEmpleado = E.IdEmpleado
         INNER JOIN dbo.ESTATUS_CLASE EC ON C.IdEstatus = EC.IdEstatusClase
         LEFT JOIN dbo.ESPECIALIDAD Esp ON C.IdEspecialidad = Esp.IdEspecialidad
-        WHERE (@Nombre IS NULL OR C.Nombre LIKE '%' + TRIM(@Nombre) + '%')
+        WHERE (@Nombre IS NULL OR C.Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
           AND (@Fecha IS NULL OR C.Fecha = @Fecha)
           AND (@IdSalon IS NULL OR C.IdSalon = @IdSalon)
           AND (@IdEmpleado IS NULL OR C.IdEmpleado = @IdEmpleado)
           AND (@IdEstatus IS NULL OR C.IdEstatus = @IdEstatus)
-        ORDER BY C.Fecha DESC, C.HoraInicio ASC;
+        ORDER BY C.Fecha DESC, C.HoraInicio DESC;
     END
 
     IF @Accion = 4 -- Modificar clase
@@ -3175,6 +3254,7 @@ CREATE OR ALTER PROCEDURE dbo.SP_RESERVA
     @IdEmpleado             INT         = NULL,
     @IdEstatus              TINYINT     = NULL,
     @ResultadoAsistencia    TINYINT     = NULL, -- 3=Asistió, 4=No asistió
+    @IdEntrenador           INT         = NULL,
     @IdUsuario              INT         = NULL
 )
 AS
@@ -3309,8 +3389,9 @@ BEGIN
         WHERE (@IdClase IS NULL OR R.IdClase = @IdClase)
           AND (@IdCliente IS NULL OR R.IdCliente = @IdCliente)
           AND (@IdEmpleado IS NULL OR R.IdEmpleado = @IdEmpleado)
+          AND (@IdEntrenador IS NULL OR C.IdEmpleado = @IdEntrenador)
           AND (@IdEstatus IS NULL OR R.IdEstatus = @IdEstatus)
-        ORDER BY C.Fecha DESC, C.HoraInicio ASC;
+        ORDER BY C.Fecha DESC, C.HoraInicio DESC;
     END
 
     IF @Accion = 5 -- Cancelar reserva (Regla 6.9: libera el cupo, conserva registro)
@@ -3339,6 +3420,18 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM dbo.RESERVA WHERE IdReserva = @IdReserva)
         BEGIN
             SELECT 'La reserva no existe.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM dbo.USUARIO WHERE IdUsuario = @IdUsuario AND IdRol = 3)
+           AND NOT EXISTS (
+               SELECT 1 FROM dbo.RESERVA R
+               INNER JOIN dbo.CLASE C ON R.IdClase = C.IdClase
+               INNER JOIN dbo.USUARIO U ON U.IdEmpleado = C.IdEmpleado
+               WHERE R.IdReserva = @IdReserva AND U.IdUsuario = @IdUsuario
+           )
+        BEGIN
+            SELECT 'Solo puede registrar la asistencia de sus propias clases.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -3427,6 +3520,12 @@ BEGIN
             RETURN;
         END
 
+        IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado AND IdEstatus = 1 AND IdPuesto = 2)
+        BEGIN
+            SELECT 'El responsable de la rutina debe ser un entrenador activo.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         EXEC dbo.SP_SUSCRIPCION @Accion = 6;
 
         IF NOT EXISTS (
@@ -3477,7 +3576,7 @@ BEGIN
         WHERE (@IdCliente IS NULL OR R.IdCliente = @IdCliente)
           AND (@IdEmpleado IS NULL OR R.IdEmpleado = @IdEmpleado)
           AND (@IdEstatus IS NULL OR R.IdEstatus = @IdEstatus)
-          AND (@Nombre IS NULL OR R.Nombre LIKE '%' + TRIM(@Nombre) + '%')
+          AND (@Nombre IS NULL OR R.Nombre COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Nombre) + '%')
         ORDER BY R.FechaAsignacion DESC;
     END
 
@@ -3879,7 +3978,7 @@ BEGIN
       AND (@Fecha IS NULL OR C.Fecha = @Fecha)
     GROUP BY C.IdClase, C.Nombre, Suc.Nombre, C.Fecha, C.HoraInicio, C.HoraFin,
              Sal.NombreNumero, C.CupoMaximo, E.Nombres, E.PrimerApellido, E.SegundoApellido, EC.Nombre
-    ORDER BY C.Fecha DESC, C.HoraInicio ASC;
+    ORDER BY C.Fecha DESC, C.HoraInicio DESC;
 END;
 GO
 
@@ -3932,7 +4031,7 @@ BEGIN
     LEFT JOIN dbo.DIFICULTAD Dif ON Ej.IdDificultad = Dif.IdDificultad
     WHERE (@IdCliente IS NULL OR R.IdCliente = @IdCliente)
       AND (@IdEmpleado IS NULL OR R.IdEmpleado = @IdEmpleado)
-      AND (@Objetivo IS NULL OR R.Objetivo LIKE '%' + TRIM(@Objetivo) + '%')
+      AND (@Objetivo IS NULL OR R.Objetivo COLLATE Latin1_General_CI_AI LIKE '%' + TRIM(@Objetivo) + '%')
       AND (@IdGrupoMuscular IS NULL OR Ej.IdGrupoMuscular = @IdGrupoMuscular)
       AND (@IdDificultad IS NULL OR Ej.IdDificultad = @IdDificultad)
       AND (@FechaInicio IS NULL OR R.FechaAsignacion >= @FechaInicio)

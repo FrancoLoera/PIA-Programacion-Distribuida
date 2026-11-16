@@ -77,14 +77,18 @@ namespace PIA_Gimnasio.Pages.Clientes
             CargarDatos();
         }
 
-        public void OnPostBaja(int id)
+        public IActionResult OnPostBaja(int id)
         {
+            if (!User.IsInRole("Administrador"))
+                return Forbid();
+
             int idUsuario = ObtenerIdUsuario();
             var r = _logica.DarDeBaja(id, idUsuario);
             Mensaje = r.Mensaje;
             TipoMensaje = r.TipoMensaje;
             AjustarSucursalSiEsRecepcionista();
             CargarDatos();
+            return Page();
         }
 
         public void OnPostReactivar(int id)

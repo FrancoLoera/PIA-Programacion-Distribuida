@@ -40,6 +40,7 @@ namespace PIA_Gimnasio.Pages.ControlAcceso
         public DataTable Accesos { get; set; } = new DataTable();
         public DataTable Socios { get; set; } = new DataTable();
         public DataTable Sucursales { get; set; } = new DataTable();
+        public DataTable SucursalesActivas { get; set; } = new DataTable();
 
         public string Mensaje { get; set; } = "";
         public string TipoMensaje { get; set; } = "";
@@ -121,6 +122,7 @@ namespace PIA_Gimnasio.Pages.ControlAcceso
             Accesos = _logicaControlAcceso.Consultar(FiltroCliente, FiltroSucursal, fechaIni, fechaFin);
             Socios = _logicaCliente.Consultar(null, null, 1); // Socios activos
             Sucursales = _logicaSucursal.Consultar();
+            SucursalesActivas = _logicaSucursal.Consultar(null, null, null, 1);
         }
 
         private int ObtenerIdUsuario()

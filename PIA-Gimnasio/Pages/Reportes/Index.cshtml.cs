@@ -9,7 +9,7 @@ using PIA_Gimnasio.Logica;
 
 namespace PIA_Gimnasio.Pages.Reportes
 {
-    [Authorize(Roles = "Administrador,Recepcionista,Entrenador")]
+    [Authorize(Roles = "Administrador")]
     public class IndexModel : PageModel
     {
         private readonly logicaReporte _logicaReporte;

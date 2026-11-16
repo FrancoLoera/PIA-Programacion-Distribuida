@@ -41,13 +41,14 @@ namespace PIA_Gimnasio.Logica
             return MapearExpediente(r);
         }
 
-        public List<bdExpediente> Consultar(int? idCliente = null, string? tipoSangre = null)
+        public List<bdExpediente> Consultar(int? idCliente = null, string? tipoSangre = null, int? idEmpleado = null)
         {
             List<SqlParameter> listaP = new List<SqlParameter>
             {
                 new SqlParameter("@Accion", 3),
                 new SqlParameter("@IdCliente", idCliente.HasValue && idCliente > 0 ? (object)idCliente.Value : DBNull.Value),
-                new SqlParameter("@TipoSangre", !string.IsNullOrWhiteSpace(tipoSangre) ? (object)tipoSangre.Trim() : DBNull.Value)
+                new SqlParameter("@TipoSangre", !string.IsNullOrWhiteSpace(tipoSangre) ? (object)tipoSangre.Trim() : DBNull.Value),
+                new SqlParameter("@IdEmpleado", idEmpleado.HasValue && idEmpleado > 0 ? (object)idEmpleado.Value : DBNull.Value)
             };
 
             DataTable dt = _bd.EjecutarStoredProcedure("dbo.SP_EXPEDIENTE", listaP.ToArray());

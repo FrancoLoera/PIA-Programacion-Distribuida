@@ -50,7 +50,7 @@ namespace PIA_Gimnasio.Pages.Clases
         public string TipoMensaje { get; set; } = "";
 
         public bool EsEntrenador => User.IsInRole("Entrenador");
-        public bool PuedeGestionar => User.IsInRole("Administrador") || User.IsInRole("Recepcionista");
+        public bool PuedeGestionar => User.IsInRole("Administrador");
 
         public void OnGet()
         {

@@ -57,14 +57,15 @@ namespace PIA_Gimnasio.Logica
             };
         }
 
-        public DataTable Consultar(int? idClase = null, int? idCliente = null, int? idEmpleado = null, byte? idEstatus = null)
+        public DataTable Consultar(int? idClase = null, int? idCliente = null, int? idEmpleado = null, byte? idEstatus = null, int? idEntrenador = null)
         {
             SqlParameter[] p = {
                 new SqlParameter("@Accion", (byte)3),
                 new SqlParameter("@IdClase", idClase.HasValue && idClase > 0 ? (object)idClase.Value : DBNull.Value),
                 new SqlParameter("@IdCliente", idCliente.HasValue && idCliente > 0 ? (object)idCliente.Value : DBNull.Value),
                 new SqlParameter("@IdEmpleado", idEmpleado.HasValue && idEmpleado > 0 ? (object)idEmpleado.Value : DBNull.Value),
-                new SqlParameter("@IdEstatus", idEstatus.HasValue && idEstatus > 0 ? (object)idEstatus.Value : DBNull.Value)
+                new SqlParameter("@IdEstatus", idEstatus.HasValue && idEstatus > 0 ? (object)idEstatus.Value : DBNull.Value),
+                new SqlParameter("@IdEntrenador", idEntrenador.HasValue && idEntrenador > 0 ? (object)idEntrenador.Value : DBNull.Value)
             };
             return _bd.EjecutarStoredProcedure("dbo.SP_RESERVA", p);
         }

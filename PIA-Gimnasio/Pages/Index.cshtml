@@ -136,41 +136,47 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card card-item h-100 border shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex flex-column align-items-start">
-                        <i class="card-icon bi bi-person-walking mb-3"></i>
-                        <h5 class="card-title fw-bold">Rutinas de entrenamiento</h5>
-                    </div>
+        @if (User.IsInRole("Administrador") || User.IsInRole("Entrenador"))
+        {
+            <div class="col-md-4">
+                <div class="card card-item h-100 border shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-start">
+                            <i class="card-icon bi bi-person-walking mb-3"></i>
+                            <h5 class="card-title fw-bold">Rutinas de entrenamiento</h5>
+                        </div>
 
-                    <p class="card-text  small">
-                        Planes semanales de ejercicios, control de objetivos y validación de contraindicaciones médicas.
-                    </p>
-                    <a asp-page="/Rutinas/Index" class="btn btn-outline-dark btn-sm">
-                        <i class="bi bi-arrow-right me-1"></i>Ir a Rutinas
-                    </a>
+                        <p class="card-text  small">
+                            Planes semanales de ejercicios, control de objetivos y validación de contraindicaciones médicas.
+                        </p>
+                        <a asp-page="/Rutinas/Index" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-arrow-right me-1"></i>Ir a Rutinas
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
 
-        <div class="col-md-4">
-            <div class="card card-item h-100 border shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex flex-column align-items-start">
-                        <i class="card-icon bi bi-file-earmark-bar-graph-fill mb-3"></i>
-                        <h5 class="card-title fw-bold">Reportes oficiales</h5>
+        @if (User.IsInRole("Administrador"))
+        {
+            <div class="col-md-4">
+                <div class="card card-item h-100 border shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-start">
+                            <i class="card-icon bi bi-file-earmark-bar-graph-fill mb-3"></i>
+                            <h5 class="card-title fw-bold">Reportes oficiales</h5>
+                        </div>
+
+                        <p class="card-text  small">
+                            Consultas y estadísticas de socios, torniquetes, asistencia de clases grupales y personal.
+                        </p>
+                        <a asp-page="/Reportes/Index" class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-arrow-right me-1"></i>Ir a Reportes
+                        </a>
                     </div>
-
-                    <p class="card-text  small">
-                        Consultas y estadísticas de socios, torniquetes, asistencia de clases grupales y personal.
-                    </p>
-                    <a asp-page="/Reportes/Index" class="btn btn-outline-dark btn-sm">
-                        <i class="bi bi-arrow-right me-1"></i>Ir a Reportes
-                    </a>
                 </div>
             </div>
-        </div>
+        }
     }
 
     @if (User.IsInRole("Administrador"))

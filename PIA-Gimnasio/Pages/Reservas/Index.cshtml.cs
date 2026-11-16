@@ -46,20 +46,24 @@ namespace PIA_Gimnasio.Pages.Reservas
 
         public bool EsEntrenador => User.IsInRole("Entrenador");
         public bool PuedeInscribir => User.IsInRole("Administrador") || User.IsInRole("Recepcionista");
+        public bool PuedeTomarAsistencia => User.IsInRole("Administrador") || User.IsInRole("Entrenador");
 
         public void OnGet()
         {
             CargarDatos();
         }
 
-        public void OnPostInscribir()
+        public IActionResult OnPostInscribir()
         {
+            if (!PuedeInscribir)
+                return Forbid();
+
             if (IdClaseReserva <= 0 || IdClienteReserva <= 0)
             {
                 TipoMensaje = "warning";
                 Mensaje = "Selecciona una clase y un socio para generar la reserva.";
                 CargarDatos();
-                return;
+                return Page();
             }
 
             int idEmpleado = ObtenerIdEmpleado();
@@ -72,26 +76,35 @@ namespace PIA_Gimnasio.Pages.Reservas
             // Mantener el filtro en la clase inscrita para ver al nuevo alumno
             FiltroClase = IdClaseReserva;
             CargarDatos();
+            return Page();
         }
 
-        public void OnPostAsistencia(int idReserva, byte resultado)
+        public IActionResult OnPostAsistencia(int idReserva, byte resultado)
         {
+            if (!PuedeTomarAsistencia)
+                return Forbid();
+
             int idUsuario = ObtenerIdUsuario();
             var r = _logicaReserva.RegistrarAsistencia(idReserva, resultado, idUsuario);
             Mensaje = r.Mensaje;
             TipoMensaje = r.TipoMensaje;
 
             CargarDatos();
+            return Page();
         }
 
-        public void OnPostCancelar(int idReserva)
+        public IActionResult OnPostCancelar(int idReserva)
         {
+            if (!PuedeInscribir)
+                return Forbid();
+
             int idUsuario = ObtenerIdUsuario();
             var r = _logicaReserva.Cancelar(idReserva, idUsuario);
             Mensaje = r.Mensaje;
             TipoMensaje = r.TipoMensaje;
 
             CargarDatos();
+            return Page();
         }
 
         private void CargarDatos()
@@ -108,7 +121,7 @@ namespace PIA_Gimnasio.Pages.Reservas
 
             // Consultar clases programadas (estatus = 1) o todas según el rol
             Clases = _logicaClase.Consultar(null, null, null, idEmpleadoFiltro, null);
-            Reservas = _logicaReserva.Consultar(FiltroClase, FiltroCliente, null, FiltroEstatus);
+            Reservas = _logicaReserva.Consultar(FiltroClase, FiltroCliente, null, FiltroEstatus, idEmpleadoFiltro);
             Socios = _logicaCliente.Consultar(null, null, 1); // Socios activos
         }
 
