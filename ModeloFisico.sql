@@ -282,6 +282,7 @@ CREATE TABLE dbo.EMPLEADO
     PrimerApellido      VARCHAR(50)     NOT NULL,
     SegundoApellido     VARCHAR(50)     NULL,
     CURP                CHAR(18)        NOT NULL,
+    RFC                 CHAR(13)        NOT NULL,
     Telefono            VARCHAR(20)     NOT NULL,
     Correo              VARCHAR(254)    NOT NULL,
     FechaNacimiento     DATE            NOT NULL,
@@ -294,6 +295,7 @@ CREATE TABLE dbo.EMPLEADO
     CONSTRAINT FK_EMPLEADO_SUCURSAL FOREIGN KEY (IdSucursal) REFERENCES dbo.SUCURSAL(IdSucursal),
     CONSTRAINT FK_EMPLEADO_ESTATUS_EMPLEADO FOREIGN KEY (IdEstatus) REFERENCES dbo.ESTATUS_EMPLEADO(IdEstatusEmpleado),
     CONSTRAINT UQ_EMPLEADO_CURP UNIQUE (CURP),
+    CONSTRAINT UQ_EMPLEADO_RFC UNIQUE (RFC),
     CONSTRAINT UQ_EMPLEADO_Telefono UNIQUE (Telefono),
     CONSTRAINT UQ_EMPLEADO_Correo UNIQUE (Correo)
 );
@@ -551,7 +553,7 @@ INSERT INTO dbo.ESTATUS_EMPLEADO (Nombre) VALUES ('Activo'), ('Inactivo'), ('Baj
 INSERT INTO dbo.ESTATUS_SUCURSAL (Nombre) VALUES ('Activa'), ('Inactiva'), ('En remodelación');
 
 -- ESTATUS_CLIENTE
-INSERT INTO dbo.ESTATUS_CLIENTE (Nombre) VALUES ('Activo'), ('Inactivo'), ('Suspendido');
+INSERT INTO dbo.ESTATUS_CLIENTE (Nombre) VALUES ('Activo'), ('Inactivo'), ('Suspendido'), ('Pendiente');
 
 -- ESTATUS_SUSCRIPCION
 INSERT INTO dbo.ESTATUS_SUSCRIPCION (Nombre) VALUES ('Pendiente'), ('Activa'), ('Vencida'), ('Cancelada');
@@ -579,44 +581,44 @@ INSERT INTO dbo.ESTATUS_USUARIO (Nombre) VALUES ('Activo'), ('Inactivo'), ('Bloq
 -- PUESTO
 INSERT INTO dbo.PUESTO (Nombre, Descripcion)
 VALUES
-    ('Gerente de sucursal', 'Responsable de administrar y supervisar las operaciones de la sucursal.'),
-    ('Entrenador', 'Encargado de orientar a los clientes y elaborar sus rutinas de entrenamiento.'),
-    ('Personal de limpieza', 'Responsable de mantener limpias e higiénicas las instalaciones.'),
-    ('Recepcionista', 'Encargado de atender a los clientes y gestionar registros y reservas.'),
-    ('Técnico de mantenimiento', 'Responsable de revisar y mantener los equipos e instalaciones.');
+    ('GERENTE DE SUCURSAL', 'Responsable de administrar y supervisar las operaciones de la sucursal.'),
+    ('ENTRENADOR', 'Encargado de orientar a los clientes y elaborar sus rutinas de entrenamiento.'),
+    ('PERSONAL DE LIMPIEZA', 'Responsable de mantener limpias e higiénicas las instalaciones.'),
+    ('RECEPCIONISTA', 'Encargado de atender a los clientes y gestionar registros y reservas.'),
+    ('TÉCNICO DE MANTENIMIENTO', 'Responsable de revisar y mantener los equipos e instalaciones.');
 
 -- ESPECIALIDAD
 INSERT INTO dbo.ESPECIALIDAD (Nombre, Descripcion)
 VALUES
-    ('Pesas', 'Entrenamiento de fuerza mediante el uso de pesas y máquinas de resistencia.'),
-    ('CrossFit', 'Entrenamiento funcional de alta intensidad que combina fuerza y resistencia.'),
-    ('Yoga', 'Disciplina enfocada en flexibilidad, equilibrio, respiración y control corporal.'),
-    ('Spinning', 'Entrenamiento cardiovascular realizado mediante bicicletas estáticas.'),
-    ('Pilates', 'Método de entrenamiento enfocado en estabilidad, postura y fortalecimiento muscular.'),
-    ('Entrenamiento funcional', 'Entrenamiento basado en movimientos que desarrollan capacidades físicas generales.'),
-    ('Acondicionamiento físico', 'Entrenamiento orientado a mejorar la resistencia y condición física general.'),
-    ('Calistenia', 'Entrenamiento de fuerza mediante ejercicios que utilizan principalmente el peso corporal.');
+    ('PESAS', 'Entrenamiento de fuerza mediante el uso de pesas y máquinas de resistencia.'),
+    ('CROSSFIT', 'Entrenamiento funcional de alta intensidad que combina fuerza y resistencia.'),
+    ('YOGA', 'Disciplina enfocada en flexibilidad, equilibrio, respiración y control corporal.'),
+    ('SPINNING', 'Entrenamiento cardiovascular realizado mediante bicicletas estáticas.'),
+    ('PILATES', 'Método de entrenamiento enfocado en estabilidad, postura y fortalecimiento muscular.'),
+    ('ENTRENAMIENTO FUNCIONAL', 'Entrenamiento basado en movimientos que desarrollan capacidades físicas generales.'),
+    ('ACONDICIONAMIENTO FÍSICO', 'Entrenamiento orientado a mejorar la resistencia y condición física general.'),
+    ('CALISTENIA', 'Entrenamiento de fuerza mediante ejercicios que utilizan principalmente el peso corporal.');
 
 -- GRUPO_MUSCULAR
 INSERT INTO dbo.GRUPO_MUSCULAR (Nombre, Descripcion)
 VALUES
-    ('Pecho', 'Grupo muscular del torso anterior involucrado en movimientos de empuje.'),
-    ('Espalda', 'Grupo muscular del torso posterior involucrado en movimientos de tracción y estabilidad.'),
-    ('Hombros', 'Grupo muscular que permite la movilidad y estabilidad de los brazos.'),
-    ('Bíceps', 'Músculos de la parte anterior del brazo que participan en la flexión del codo.'),
-    ('Tríceps', 'Músculos de la parte posterior del brazo que participan en la extensión del codo.'),
-    ('Abdomen', 'Músculos de la región abdominal que contribuyen a la estabilidad del tronco.'),
-    ('Cuádriceps', 'Grupo muscular de la parte anterior del muslo que participa en la extensión de la rodilla.'),
-    ('Isquiotibiales', 'Grupo muscular de la parte posterior del muslo que participa en la flexión de la rodilla y extensión de la cadera.'),
-    ('Glúteos', 'Grupo muscular de la región posterior de la cadera involucrado en la extensión y estabilización.'),
-    ('Pantorrillas', 'Grupo muscular de la parte posterior de la pierna que participa en la flexión plantar del pie.');
+    ('PECHO', 'Grupo muscular del torso anterior involucrado en movimientos de empuje.'),
+    ('ESPALDA', 'Grupo muscular del torso posterior involucrado en movimientos de tracción y estabilidad.'),
+    ('HOMBROS', 'Grupo muscular que permite la movilidad y estabilidad de los brazos.'),
+    ('BÍCEPS', 'Músculos de la parte anterior del brazo que participan en la flexión del codo.'),
+    ('TRÍCEPS', 'Músculos de la parte posterior del brazo que participan en la extensión del codo.'),
+    ('ABDOMEN', 'Músculos de la región abdominal que contribuyen a la estabilidad del tronco.'),
+    ('CUÁDRICEPS', 'Grupo muscular de la parte anterior del muslo que participa en la extensión de la rodilla.'),
+    ('ISQUIOTIBIALES', 'Grupo muscular de la parte posterior del muslo que participa en la flexión de la rodilla y extensión de la cadera.'),
+    ('GLÚTEOS', 'Grupo muscular de la región posterior de la cadera involucrado en la extensión y estabilización.'),
+    ('PANTORRILLAS', 'Grupo muscular de la parte posterior de la pierna que participa en la flexión plantar del pie.');
 
 -- DIFICULTAD
 INSERT INTO dbo.DIFICULTAD (Nombre, Descripcion)
 VALUES
-    ('Principiante', 'Ejercicios de baja complejidad para personas que comienzan a entrenar.'),
-    ('Intermedio', 'Ejercicios que requieren experiencia y una condición física moderada.'),
-    ('Avanzado', 'Ejercicios de alta complejidad que requieren experiencia y buena condición física.');
+    ('PRINCIPIANTE', 'Ejercicios de baja complejidad para personas que comienzan a entrenar.'),
+    ('INTERMEDIO', 'Ejercicios que requieren experiencia y una condición física moderada.'),
+    ('AVANZADO', 'Ejercicios de alta complejidad que requieren experiencia y buena condición física.');
 
 -- ROL: 1=Administrador, 2=Recepcionista, 3=Entrenador
 INSERT INTO dbo.ROL (Nombre, Descripcion)
@@ -628,33 +630,33 @@ VALUES
 -- CONDICION
 INSERT INTO dbo.CONDICION (Nombre, Tipo, Descripcion)
 VALUES
-    ('Hipertensión arterial', 'Riesgo', 'Presión sanguínea crónicamente elevada. Evitar esfuerzos isométricos extremos.'),
-    ('Lesión de columna lumbar', 'Lesión', 'Hernia o degeneración en discos lumbares. Evitar sobrecarga axial.'),
-    ('Lesión de menisco', 'Lesión', 'Afección en la articulación de la rodilla. Evitar impacto y flexiones profundas.'),
-    ('Asma bronquial', 'Padecimiento', 'Afección respiratoria reactiva. Cuidar descansos y ventilación.'),
-    ('Alergia al látex', 'Alergia', 'Reacción al contacto con bandas de resistencia u otros artículos de goma.'),
-    ('Tendinitis de manguito rotador', 'Lesión', 'Inflamación de tendones en hombro. Evitar elevaciones laterales pesadas.');
+    ('HIPERTENSIÓN ARTERIAL', 'Riesgo', 'Presión sanguínea crónicamente elevada. Evitar esfuerzos isométricos extremos.'),
+    ('LESIÓN DE COLUMNA LUMBAR', 'Lesión', 'Hernia o degeneración en discos lumbares. Evitar sobrecarga axial.'),
+    ('LESIÓN DE MENISCO', 'Lesión', 'Afección en la articulación de la rodilla. Evitar impacto y flexiones profundas.'),
+    ('ASMA BRONQUIAL', 'Padecimiento', 'Afección respiratoria reactiva. Cuidar descansos y ventilación.'),
+    ('ALERGIA AL LÁTEX', 'Alergia', 'Reacción al contacto con bandas de resistencia u otros artículos de goma.'),
+    ('TENDINITIS DE MANGUITO ROTADOR', 'Lesión', 'Inflamación de tendones en hombro. Evitar elevaciones laterales pesadas.');
 
 -- MEMBRESIA
 INSERT INTO dbo.MEMBRESIA (Nombre, Precio, Descripcion, PermiteClases, MaxClasesSemana, SujetaAforo)
 VALUES
-    ('Bronce', 500.00, 'Permite únicamente el acceso a las instalaciones del gimnasio.', 0, 0, 0),
-    ('Plata', 1000.00, 'Permite agendar hasta 3 clases por semana, sujeto al aforo disponible.', 1, 3, 1),
-    ('Oro', 1500.00, 'Permite agendar hasta 5 clases por semana, sin restricciones de aforo.', 1, 5, 0);
+    ('BRONCE', 500.00, 'Permite únicamente el acceso a las instalaciones del gimnasio.', 0, 0, 0),
+    ('PLATA', 1000.00, 'Permite agendar hasta 3 clases por semana, sujeto al aforo disponible.', 1, 3, 1),
+    ('ORO', 1500.00, 'Permite agendar hasta 5 clases por semana, sin restricciones de aforo.', 1, 5, 0);
 
 -- SUCURSAL INICIAL
 INSERT INTO dbo.SUCURSAL
     (Nombre, Telefono, NumeroExterior, NumeroInterior, Calle, Colonia, Ciudad, Estado, AforoMaximo, HoraApertura, HoraCierre, IdEstatus)
 VALUES
-    ('Sucursal Central', '8111223344', '100', NULL, 'Av. Universidad', 'Centro', 'Monterrey', 'Nuevo León', 150, '06:00:00', '22:00:00', 1);
+    ('SUCURSAL CENTRAL', '8111223344', '100', NULL, 'Av. Universidad', 'Centro', 'Monterrey', 'Nuevo León', 150, '06:00:00', '22:00:00', 1);
 
 -- EMPLEADO INICIAL (Administrador General del Sistema)
 INSERT INTO dbo.EMPLEADO
-    (Nombres, PrimerApellido, SegundoApellido, CURP, Telefono, Correo, FechaNacimiento, FechaContratacion, IdPuesto, IdSucursal, IdEstatus)
+    (Nombres, PrimerApellido, SegundoApellido, CURP, RFC, Telefono, Correo, FechaNacimiento, FechaContratacion, IdPuesto, IdSucursal, IdEstatus)
 VALUES
-    ('Administrador', 'General', 'Sistema', 'ADMI000101HNLXXX01', '8199887766', 'admin@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 1, 1, 1),
-    ('Recepcionista', 'General', 'Sistema', 'RECE000101HNLXXX01', '8199887765', 'recep@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 4, 1, 1),
-    ('Entrenador', 'General', 'Sistema', 'ENTR000101HNLXXX01', '8199887764', 'entre@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 2, 1, 1);
+    ('ADMINISTRADOR', 'GENERAL', 'SISTEMA', 'ADMI000101HNLXXX01', 'ADMI000101A01', '8199887766', 'admin@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 1, 1, 1),
+    ('RECEPCIONISTA', 'GENERAL', 'SISTEMA', 'RECE000101HNLXXX01', 'RECE000101A02', '8199887765', 'recep@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 4, 1, 1),
+    ('ENTRENADOR', 'GENERAL', 'SISTEMA', 'ENTR000101HNLXXX01', 'ENTR000101A03', '8199887764', 'entre@gymsystem.com', '1990-01-01', CAST(GETDATE() AS DATE), 2, 1, 1);
 
 INSERT INTO dbo.USUARIO
     (NombreCuenta, Contrasena, FechaRegistro, IdRol, IdEmpleado, IdEstatus)
@@ -674,40 +676,40 @@ GO
 INSERT INTO dbo.SUCURSAL
     (Nombre, Telefono, NumeroExterior, NumeroInterior, Calle, Colonia, Ciudad, Estado, AforoMaximo, HoraApertura, HoraCierre, IdEstatus)
 VALUES
-    ('Sucursal Norte',  '8121334455', '250', 'Local 3', 'Av. Constitución', 'Mitras Norte',  'Monterrey', 'Nuevo León', 100, '05:30:00', '21:30:00', 1),
-    ('Sucursal Sur',    '8132445566', '45',  NULL,       'Blvd. Díaz Ordaz', 'Del Valle',     'San Pedro Garza García', 'Nuevo León', 80, '06:00:00', '22:00:00', 1);
+    ('SUCURSAL NORTE',  '8121334455', '250', 'Local 3', 'Av. Constitución', 'Mitras Norte',  'Monterrey', 'Nuevo León', 100, '05:30:00', '21:30:00', 1),
+    ('SUCURSAL SUR',    '8132445566', '45',  NULL,       'Blvd. Díaz Ordaz', 'Del Valle',     'San Pedro Garza García', 'Nuevo León', 80, '06:00:00', '22:00:00', 1);
 
 -- ============================================================
 -- SALONES
 -- ============================================================
 INSERT INTO dbo.SALON (NombreNumero, IdSucursal, IdEstatus)
 VALUES
-    ('Salón A',     1, 1),
-    ('Salón B',     1, 1),
-    ('Salón Spin',  2, 1),
-    ('Salón Yoga',  3, 1);
+    ('SALÓN A',     1, 1),
+    ('SALÓN B',     1, 1),
+    ('SALÓN SPIN',  2, 1),
+    ('SALÓN YOGA',  3, 1);
 
 -- ============================================================
 -- EMPLEADOS ADICIONALES (Recepcionista, Entrenadores)
 -- ============================================================
 INSERT INTO dbo.EMPLEADO
-    (Nombres, PrimerApellido, SegundoApellido, CURP, Telefono, Correo, FechaNacimiento, FechaContratacion, IdPuesto, IdSucursal, IdEstatus)
+    (Nombres, PrimerApellido, SegundoApellido, CURP, RFC, Telefono, Correo, FechaNacimiento, FechaContratacion, IdPuesto, IdSucursal, IdEstatus)
 VALUES
     -- Recepcionista - Sucursal Central
-    ('Laura',    'Martínez', 'Soto',    'MASL950310MNLRTR09', '8111000001', 'laura.martinez@gym.com',  '1995-03-10', '2022-01-15', 4, 1, 1),
+    ('LAURA',    'MARTÍNEZ', 'SOTO',    'MASL950310MNLRTR09', 'MASL950310AB1', '8111000001', 'laura.martinez@gym.com',  '1995-03-10', '2022-01-15', 4, 1, 1),
     -- Entrenador 1 - Sucursal Central
-    ('Carlos',   'Ramírez',  'Flores',  'RAFC880720HNLMLR02', '8111000002', 'carlos.ramirez@gym.com',  '1988-07-20', '2021-06-01', 2, 1, 1),
+    ('CARLOS',   'RAMÍREZ',  'FLORES',  'RAFC880720HNLMLR02', 'RAFC880720CD2', '8111000002', 'carlos.ramirez@gym.com',  '1988-07-20', '2021-06-01', 2, 1, 1),
     -- Entrenador 2 - Sucursal Norte
-    ('Sofía',    'González', 'López',   'GOLS910415MNLLPF07', '8111000003', 'sofia.gonzalez@gym.com',  '1991-04-15', '2022-03-10', 2, 2, 1),
+    ('SOFÍA',    'GONZÁLEZ', 'LÓPEZ',   'GOLS910415MNLLPF07', 'GOLS910415EF3', '8111000003', 'sofia.gonzalez@gym.com',  '1991-04-15', '2022-03-10', 2, 2, 1),
     -- Recepcionista - Sucursal Sur
-    ('Miguel',   'Torres',   'Herrera', 'TOHM930825HNLRRG05', '8111000004', 'miguel.torres@gym.com',   '1993-08-25', '2023-01-05', 4, 3, 1);
+    ('MIGUEL',   'TORRES',   'HERRERA', 'TOHM930825HNLRRG05', 'TOHM930825GH4', '8111000004', 'miguel.torres@gym.com',   '1993-08-25', '2023-01-05', 4, 3, 1);
 
 -- Especialidades de los entrenadores
 INSERT INTO dbo.EMPLEADO_ESPECIALIDAD (IdEmpleado, IdEspecialidad)
 VALUES
-    (2, 1), (2, 6),   -- Carlos: Pesas, Entrenamiento funcional
-    (3, 4), (3, 7),   -- Sofía: Spinning, Acondicionamiento físico
-    (3, 5);           -- Sofía también: Pilates
+    (5, 1), (5, 6),   -- Carlos: Pesas, Entrenamiento funcional
+    (6, 4), (6, 7),   -- Sofía: Spinning, Acondicionamiento físico
+    (6, 5);           -- Sofía también: Pilates
 
 -- ============================================================
 -- CUENTAS DE USUARIO ADICIONALES
@@ -715,9 +717,9 @@ VALUES
 INSERT INTO dbo.USUARIO
     (NombreCuenta, Contrasena, FechaRegistro, IdRol, IdEmpleado, IdEstatus)
 VALUES
-    ('recepcion1', 'Recep123!', SYSDATETIME(), 2, 2, 1),  -- Laura (Recepcionista)
-    ('carlos.e',   'Train123!', SYSDATETIME(), 3, 3, 1),  -- Carlos (Entrenador)
-    ('sofia.e',    'Train456!', SYSDATETIME(), 3, 4, 1);  -- Sofía (Entrenador)
+    ('recepcion1', 'Recep123!', SYSDATETIME(), 2, 4, 1),  -- Laura (Recepcionista)
+    ('carlos.e',   'Train123!', SYSDATETIME(), 3, 5, 1),  -- Carlos (Entrenador)
+    ('sofia.e',    'Train456!', SYSDATETIME(), 3, 6, 1);  -- Sofía (Entrenador)
 
 -- ============================================================
 -- CLIENTES / SOCIOS
@@ -725,12 +727,12 @@ VALUES
 INSERT INTO dbo.CLIENTE
     (Nombres, PrimerApellido, SegundoApellido, Telefono, Correo, FechaNacimiento, FechaInscripcion, IdSucursal, IdEstatus)
 VALUES
-    ('Andrés',    'Vega',      'Morales',  '8190001001', 'andres.vega@mail.com',    '1992-05-14', '2024-01-10', 1, 1),
-    ('Mariana',   'Peña',      'Ríos',     '8190001002', 'mariana.pena@mail.com',   '1998-11-22', '2024-02-01', 1, 1),
-    ('Roberto',   'Salinas',   'Cruz',     '8190001003', 'roberto.salinas@mail.com','1985-03-30', '2024-03-15', 2, 1),
-    ('Fernanda',  'Chávez',    NULL,       '8190001004', 'fernanda.chavez@mail.com','2000-07-08', '2024-04-20', 1, 1),
-    ('Diego',     'Moreno',    'Estrada',  '8190001005', 'diego.moreno@mail.com',   '1990-09-01', '2024-05-05', 3, 1),
-    ('Valentina', 'Herrero',   'Blanco',   '8190001006', 'valentina.herrero@mail.com','1995-12-19','2024-06-01',2, 1);
+    ('ANDRÉS',    'VEGA',      'MORALES',  '8190001001', 'andres.vega@mail.com',    '1992-05-14', '2024-01-10', 1, 1),
+    ('MARIANA',   'PEÑA',      'RÍOS',     '8190001002', 'mariana.pena@mail.com',   '1998-11-22', '2024-02-01', 1, 1),
+    ('ROBERTO',   'SALINAS',   'CRUZ',     '8190001003', 'roberto.salinas@mail.com','1985-03-30', '2024-03-15', 2, 1),
+    ('FERNANDA',  'CHÁVEZ',    NULL,       '8190001004', 'fernanda.chavez@mail.com','2000-07-08', '2024-04-20', 1, 1),
+    ('DIEGO',     'MORENO',    'ESTRADA',  '8190001005', 'diego.moreno@mail.com',   '1990-09-01', '2024-05-05', 3, 1),
+    ('VALENTINA', 'HERRERO',   'BLANCO',   '8190001006', 'valentina.herrero@mail.com','1995-12-19','2024-06-01',2, 1);
 
 -- ============================================================
 -- SUSCRIPCIONES (Acción 1 equivalente: INSERT directo con IdEstatus=2 Activa)
@@ -782,40 +784,40 @@ VALUES
 -- ============================================================
 INSERT INTO dbo.CLASE (Nombre, Fecha, HoraInicio, HoraFin, CupoMaximo, IdSalon, IdEmpleado, IdEspecialidad, IdEstatus)
 VALUES
-    ('Pesas Funcional - Mañana',  '2025-11-07', '07:00:00', '08:00:00', 15, 1, 3, 1, 1),  -- Carlos, Salón A, Programada
-    ('Spinning Intensivo',         '2025-11-07', '09:00:00', '10:00:00', 20, 3, 4, 4, 1),  -- Sofía, Salón Spin, Programada
-    ('Yoga Restaurativo',          '2025-11-08', '10:00:00', '11:00:00', 12, 4, 4, 3, 1),  -- Sofía, Salón Yoga, Programada
-    ('Funcional Avanzado',         '2025-11-05', '07:00:00', '08:00:00', 10, 2, 3, 6, 3),  -- Carlos, Salón B, Finalizada
-    ('Pilates Core',               '2025-11-10', '08:00:00', '09:00:00', 10, 4, 4, 5, 1);  -- Sofía, Salón Yoga, Programada
+    ('PESAS FUNCIONAL - MAÑANA',  '2025-11-07', '07:00:00', '08:00:00', 15, 1, 5, 1, 1),  -- Carlos, Salón A, Programada
+    ('SPINNING INTENSIVO',         '2025-11-07', '09:00:00', '10:00:00', 20, 3, 6, 4, 1),  -- Sofía, Salón Spin, Programada
+    ('YOGA RESTAURATIVO',          '2025-11-06', '10:00:00', '11:00:00', 12, 4, 6, 3, 1),  -- Sofía, Salón Yoga, Programada
+    ('FUNCIONAL AVANZADO',         '2025-11-05', '07:00:00', '08:00:00', 10, 2, 5, 6, 3),  -- Carlos, Salón B, Finalizada
+    ('PILATES CORE',               '2025-11-10', '08:00:00', '09:00:00', 10, 4, 6, 5, 1);  -- Sofía, Salón Yoga, Programada
 
 -- ============================================================
 -- RESERVAS
 -- ============================================================
 INSERT INTO dbo.RESERVA (FechaHora, IdClase, IdCliente, IdEmpleado, IdEstatus)
 VALUES
-    ('2025-11-05 06:30:00', 4, 1, 3, 3),  -- Andrés reservó Funcional Avanzado → Asistió
-    ('2025-11-05 06:35:00', 4, 2, 3, 3),  -- Mariana reservó Funcional Avanzado → Asistió
-    ('2025-11-05 06:40:00', 4, 4, 3, 4),  -- Fernanda reservó Funcional Avanzado → No asistió
-    ('2025-11-07 06:50:00', 1, 1, 3, 1),  -- Andrés reservó Pesas Funcional → Confirmada
-    ('2025-11-07 06:55:00', 1, 2, 3, 1),  -- Mariana reservó Pesas Funcional → Confirmada
-    ('2025-11-07 08:30:00', 2, 5, 3, 1),  -- Diego reservó Spinning → Confirmada
-    ('2025-11-08 09:30:00', 3, 6, 3, 1);  -- Valentina reservó Yoga → Confirmada
+    ('2025-11-05 06:30:00', 4, 1, 4, 3),  -- Andrés reservó Funcional Avanzado → Asistió
+    ('2025-11-05 06:35:00', 4, 2, 4, 3),  -- Mariana reservó Funcional Avanzado → Asistió
+    ('2025-11-05 06:40:00', 4, 4, 4, 4),  -- Fernanda reservó Funcional Avanzado → No asistió
+    ('2025-11-07 06:50:00', 1, 1, 4, 1),  -- Andrés reservó Pesas Funcional → Confirmada
+    ('2025-11-07 06:55:00', 1, 2, 4, 1),  -- Mariana reservó Pesas Funcional → Confirmada
+    ('2025-11-07 08:30:00', 2, 5, 4, 1),  -- Diego reservó Spinning → Confirmada
+    ('2025-11-06 09:30:00', 3, 6, 4, 1);  -- Valentina reservó Yoga → Confirmada
 
 -- ============================================================
 -- EJERCICIOS
 -- ============================================================
 INSERT INTO dbo.EJERCICIO (Nombre, Descripcion, IdGrupoMuscular, IdDificultad)
 VALUES
-    ('Press de banca plano',      'Empuje horizontal con barra acostado en banco plano.',          1, 2),  -- Pecho, Intermedio
-    ('Sentadilla con barra',      'Sentadilla profunda con barra sobre los hombros.',              7, 2),  -- Cuádriceps, Intermedio
-    ('Peso muerto convencional',  'Levantamiento de barra desde el piso con espalda neutral.',     2, 3),  -- Espalda, Avanzado
-    ('Curl de bíceps con mancuernas','Flexión de codo con mancuernas, alternada.',                4, 1),  -- Bíceps, Principiante
-    ('Extensión de tríceps en polea','Empuje descendente en polea alta para tríceps.',            5, 1),  -- Tríceps, Principiante
-    ('Plancha abdominal',         'Posición isométrica en prono para trabajar el core.',           6, 1),  -- Abdomen, Principiante
-    ('Hip thrust',                'Empuje de cadera con barra para glúteos.',                      9, 2),  -- Glúteos, Intermedio
-    ('Elevación de talones',      'Movimiento de flexión plantar de pie en máquina.',              10, 1), -- Pantorrillas, Principiante
-    ('Press militar con barra',   'Empuje vertical de barra sobre la cabeza en posición de pie.',  3, 2),  -- Hombros, Intermedio
-    ('Remo con barra',            'Tracción horizontal de barra hacia el abdomen inclinado.',      2, 2);  -- Espalda, Intermedio
+    ('PRESS DE BANCA PLANO',      'Empuje horizontal con barra acostado en banco plano.',          1, 2),  -- Pecho, Intermedio
+    ('SENTADILLA CON BARRA',      'Sentadilla profunda con barra sobre los hombros.',              7, 2),  -- Cuádriceps, Intermedio
+    ('PESO MUERTO CONVENCIONAL',  'Levantamiento de barra desde el piso con espalda neutral.',     2, 3),  -- Espalda, Avanzado
+    ('CURL DE BÍCEPS CON MANCUERNAS','Flexión de codo con mancuernas, alternada.',                4, 1),  -- Bíceps, Principiante
+    ('EXTENSIÓN DE TRÍCEPS EN POLEA','Empuje descendente en polea alta para tríceps.',            5, 1),  -- Tríceps, Principiante
+    ('PLANCHA ABDOMINAL',         'Posición isométrica en prono para trabajar el core.',           6, 1),  -- Abdomen, Principiante
+    ('HIP THRUST',                'Empuje de cadera con barra para glúteos.',                      9, 2),  -- Glúteos, Intermedio
+    ('ELEVACIÓN DE TALONES',      'Movimiento de flexión plantar de pie en máquina.',              10, 1), -- Pantorrillas, Principiante
+    ('PRESS MILITAR CON BARRA',   'Empuje vertical de barra sobre la cabeza en posición de pie.',  3, 2),  -- Hombros, Intermedio
+    ('REMO CON BARRA',            'Tracción horizontal de barra hacia el abdomen inclinado.',      2, 2);  -- Espalda, Intermedio
 
 -- Contraindicaciones de ejercicios
 INSERT INTO dbo.EJERCICIO_CONTRAINDICACION (IdEjercicio, IdCondicion)
@@ -831,9 +833,9 @@ VALUES
 -- ============================================================
 INSERT INTO dbo.RUTINA (Nombre, FechaAsignacion, Objetivo, IdCliente, IdEmpleado, IdEstatus)
 VALUES
-    ('Hipertrofia Torso-Pierna',     '2025-10-20', 'Ganancia de masa muscular en tren superior e inferior alternado, 8 semanas.', 1, 3, 1), -- Andrés, Carlos, Activa
-    ('Acondicionamiento Inicial',    '2025-10-25', 'Mejora de condición física general y adaptación al ejercicio para principiante.', 2, 3, 1), -- Mariana, Carlos, Activa
-    ('Rehabilitación y Movilidad',   '2025-10-15', 'Plan adaptado con restricciones médicas: sin peso axial ni impacto en rodilla.', 5, 3, 1); -- Diego, Carlos, Activa
+    ('HIPERTROFIA TORSO-PIERNA',     '2025-10-20', 'Ganancia de masa muscular en tren superior e inferior alternado, 8 semanas.', 1, 5, 1), -- Andrés, Carlos, Activa
+    ('ACONDICIONAMIENTO INICIAL',    '2025-10-25', 'Mejora de condición física general y adaptación al ejercicio para principiante.', 2, 5, 1), -- Mariana, Carlos, Activa
+    ('REHABILITACIÓN Y MOVILIDAD',   '2025-10-15', 'Plan adaptado con restricciones médicas: sin peso axial ni impacto en rodilla.', 5, 5, 1); -- Diego, Carlos, Activa
 
 -- Detalles de Rutina 1 (Andrés): Lunes Pecho/Tríceps, Miércoles Pierna
 INSERT INTO dbo.DETALLE_RUTINA (DiaSemana, Series, Repeticiones, TiempoDescanso, IdRutina, IdEjercicio)
@@ -894,7 +896,7 @@ BEGIN
         END
 
         INSERT INTO dbo.GRUPO_MUSCULAR (Nombre, Descripcion)
-        VALUES (TRIM(@Nombre), TRIM(@Descripcion));
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Descripcion));
 
         SET @IdGrupoMuscular = SCOPE_IDENTITY();
 
@@ -931,7 +933,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.GRUPO_MUSCULAR WHERE IdGrupoMuscular = @IdGrupoMuscular FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.GRUPO_MUSCULAR
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion)
         WHERE IdGrupoMuscular = @IdGrupoMuscular;
 
@@ -979,7 +981,7 @@ BEGIN
     IF @Accion = 1 -- Insertar
     BEGIN
         INSERT INTO dbo.DIFICULTAD (Nombre, Descripcion)
-        VALUES (TRIM(@Nombre), TRIM(@Descripcion));
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Descripcion));
         SET @IdDificultad = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.DIFICULTAD WHERE IdDificultad = @IdDificultad FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1003,7 +1005,7 @@ BEGIN
     BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.DIFICULTAD WHERE IdDificultad = @IdDificultad FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         UPDATE dbo.DIFICULTAD
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion)
         WHERE IdDificultad = @IdDificultad;
 
@@ -1034,7 +1036,7 @@ BEGIN
     IF @Accion = 1 -- Insertar
     BEGIN
         INSERT INTO dbo.PUESTO (Nombre, Descripcion)
-        VALUES (TRIM(@Nombre), TRIM(@Descripcion));
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Descripcion));
         SET @IdPuesto = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.PUESTO WHERE IdPuesto = @IdPuesto FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1058,7 +1060,7 @@ BEGIN
     BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.PUESTO WHERE IdPuesto = @IdPuesto FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         UPDATE dbo.PUESTO
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion)
         WHERE IdPuesto = @IdPuesto;
 
@@ -1095,7 +1097,7 @@ BEGIN
         END
 
         INSERT INTO dbo.ESPECIALIDAD (Nombre, Descripcion)
-        VALUES (TRIM(@Nombre), TRIM(@Descripcion));
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Descripcion));
         SET @IdEspecialidad = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.ESPECIALIDAD WHERE IdEspecialidad = @IdEspecialidad FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1119,7 +1121,7 @@ BEGIN
     BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.ESPECIALIDAD WHERE IdEspecialidad = @IdEspecialidad FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         UPDATE dbo.ESPECIALIDAD
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion)
         WHERE IdEspecialidad = @IdEspecialidad;
 
@@ -1181,7 +1183,7 @@ BEGIN
         END
 
         INSERT INTO dbo.CONDICION (Nombre, Tipo, Descripcion)
-        VALUES (TRIM(@Nombre), TRIM(@Tipo), TRIM(@Descripcion));
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Tipo), TRIM(@Descripcion));
         SET @IdCondicion = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.CONDICION WHERE IdCondicion = @IdCondicion FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1209,7 +1211,7 @@ BEGIN
     BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.CONDICION WHERE IdCondicion = @IdCondicion FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         UPDATE dbo.CONDICION
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Tipo = COALESCE(NULLIF(TRIM(@Tipo), ''), Tipo),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion)
         WHERE IdCondicion = @IdCondicion;
@@ -1263,7 +1265,7 @@ BEGIN
     IF @Accion = 1 -- Insertar
     BEGIN
         INSERT INTO dbo.MEMBRESIA (Nombre, Precio, Descripcion, PermiteClases, MaxClasesSemana, SujetaAforo)
-        VALUES (TRIM(@Nombre), @Precio, TRIM(@Descripcion), @PermiteClases, @MaxClasesSemana, @SujetaAforo);
+        VALUES (UPPER(TRIM(@Nombre)), @Precio, TRIM(@Descripcion), @PermiteClases, @MaxClasesSemana, @SujetaAforo);
         SET @IdMembresia = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1292,7 +1294,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.MEMBRESIA
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Precio = COALESCE(@Precio, Precio),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion),
             PermiteClases = COALESCE(@PermiteClases, PermiteClases),
@@ -1351,7 +1353,7 @@ BEGIN
         INSERT INTO dbo.SUCURSAL
             (Nombre, Telefono, NumeroExterior, NumeroInterior, Calle, Colonia, Ciudad, Estado, AforoMaximo, HoraApertura, HoraCierre, IdEstatus)
         VALUES
-            (TRIM(@Nombre), TRIM(@Telefono), TRIM(@NumeroExterior), TRIM(@NumeroInterior),
+            (UPPER(TRIM(@Nombre)), TRIM(@Telefono), TRIM(@NumeroExterior), TRIM(@NumeroInterior),
              TRIM(@Calle), TRIM(@Colonia), TRIM(@Ciudad), TRIM(@Estado), @AforoMaximo,
              @HoraApertura, @HoraCierre, ISNULL(@IdEstatus, 1));
 
@@ -1417,7 +1419,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.SUCURSAL WHERE IdSucursal = @IdSucursal FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.SUCURSAL
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Telefono = COALESCE(NULLIF(TRIM(@Telefono), ''), Telefono),
             NumeroExterior = COALESCE(NULLIF(TRIM(@NumeroExterior), ''), NumeroExterior),
             NumeroInterior = COALESCE(TRIM(@NumeroInterior), NumeroInterior),
@@ -1516,7 +1518,7 @@ BEGIN
         END
 
         INSERT INTO dbo.SALON (NombreNumero, IdSucursal, IdEstatus)
-        VALUES (TRIM(@NombreNumero), @IdSucursal, ISNULL(@IdEstatus, 1));
+        VALUES (UPPER(TRIM(@NombreNumero)), @IdSucursal, ISNULL(@IdEstatus, 1));
         SET @IdSalon = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.SALON WHERE IdSalon = @IdSalon FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -1573,7 +1575,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.SALON WHERE IdSalon = @IdSalon FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.SALON
-        SET NombreNumero = COALESCE(NULLIF(TRIM(@NombreNumero), ''), NombreNumero),
+        SET NombreNumero = COALESCE(NULLIF(UPPER(TRIM(@NombreNumero)), ''), NombreNumero),
             IdSucursal = COALESCE(@IdSucursal, IdSucursal),
             IdEstatus = COALESCE(@IdEstatus, IdEstatus)
         WHERE IdSalon = @IdSalon;
@@ -1628,6 +1630,7 @@ CREATE OR ALTER PROCEDURE dbo.SP_EMPLEADO
     @PrimerApellido     VARCHAR(50)     = NULL,
     @SegundoApellido    VARCHAR(50)     = NULL,
     @CURP               CHAR(18)        = NULL,
+    @RFC                CHAR(13)        = NULL,
     @Telefono           VARCHAR(20)     = NULL,
     @Correo             VARCHAR(254)    = NULL,
     @FechaNacimiento    DATE            = NULL,
@@ -1647,7 +1650,7 @@ BEGIN
     IF @Accion = 1 -- Insertar empleado
     BEGIN
         IF @Nombres IS NULL OR TRIM(@Nombres) = '' OR @PrimerApellido IS NULL OR TRIM(@PrimerApellido) = ''
-           OR @CURP IS NULL OR TRIM(@CURP) = '' OR @Telefono IS NULL OR TRIM(@Telefono) = ''
+           OR @CURP IS NULL OR TRIM(@CURP) = '' OR @RFC IS NULL OR TRIM(@RFC) = '' OR @Telefono IS NULL OR TRIM(@Telefono) = ''
            OR @Correo IS NULL OR TRIM(@Correo) = '' OR @FechaNacimiento IS NULL OR @IdPuesto IS NULL OR @IdSucursal IS NULL
         BEGIN
             SELECT 'Todos los campos obligatorios deben ser completados.' AS Mensaje, 'warning' AS TipoMensaje;
@@ -1668,6 +1671,12 @@ BEGIN
             RETURN;
         END
 
+        IF EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE RFC = UPPER(TRIM(@RFC)))
+        BEGIN
+            SELECT 'Ya existe un empleado registrado con ese RFC.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         IF EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE Correo = LOWER(TRIM(@Correo)))
         BEGIN
             SELECT 'Ya existe un empleado registrado con ese correo electrónico.' AS Mensaje, 'warning' AS TipoMensaje;
@@ -1681,12 +1690,12 @@ BEGIN
         END
 
         INSERT INTO dbo.EMPLEADO
-            (Nombres, PrimerApellido, SegundoApellido, CURP, Telefono, Correo,
+            (Nombres, PrimerApellido, SegundoApellido, CURP, RFC, Telefono, Correo,
              FechaNacimiento, FechaContratacion, IdPuesto, IdSucursal, IdEstatus)
         VALUES
-            (TRIM(@Nombres), TRIM(@PrimerApellido), TRIM(@SegundoApellido), UPPER(TRIM(@CURP)),
-             TRIM(@Telefono), LOWER(TRIM(@Correo)), @FechaNacimiento,
-             COALESCE(@FechaContratacion, CAST(GETDATE() AS DATE)), @IdPuesto, @IdSucursal, ISNULL(@IdEstatus, 1));
+            (UPPER(TRIM(@Nombres)), UPPER(TRIM(@PrimerApellido)), UPPER(TRIM(@SegundoApellido)), UPPER(TRIM(@CURP)),
+             UPPER(TRIM(@RFC)), TRIM(@Telefono), LOWER(TRIM(@Correo)), @FechaNacimiento,
+             COALESCE(@FechaContratacion, CAST(GETDATE() AS DATE)), @IdPuesto, @IdSucursal, 1);
 
         SET @IdEmpleado = SCOPE_IDENTITY();
 
@@ -1700,7 +1709,7 @@ BEGIN
     IF @Accion = 2 -- Consultar por Id
     BEGIN
         SELECT E.IdEmpleado, E.Nombres, E.PrimerApellido, E.SegundoApellido,
-               E.CURP, E.Telefono, E.Correo, E.FechaNacimiento, E.FechaContratacion,
+               E.CURP, E.RFC, E.Telefono, E.Correo, E.FechaNacimiento, E.FechaContratacion,
                E.IdPuesto, P.Nombre AS Puesto,
                E.IdSucursal, S.Nombre AS Sucursal,
                E.IdEstatus, EE.Nombre AS Estatus,
@@ -1720,7 +1729,7 @@ BEGIN
     IF @Accion = 3 -- Consulta general con filtros
     BEGIN
         SELECT E.IdEmpleado, E.Nombres, E.PrimerApellido, E.SegundoApellido,
-               E.CURP, E.Telefono, E.Correo, E.FechaNacimiento, E.FechaContratacion,
+               E.CURP, E.RFC, E.Telefono, E.Correo, E.FechaNacimiento, E.FechaContratacion,
                E.IdPuesto, P.Nombre AS Puesto,
                E.IdSucursal, S.Nombre AS Sucursal,
                E.IdEstatus, EE.Nombre AS Estatus,
@@ -1782,10 +1791,11 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.EMPLEADO
-        SET Nombres = COALESCE(NULLIF(TRIM(@Nombres), ''), Nombres),
-            PrimerApellido = COALESCE(NULLIF(TRIM(@PrimerApellido), ''), PrimerApellido),
-            SegundoApellido = COALESCE(TRIM(@SegundoApellido), SegundoApellido),
+        SET Nombres = COALESCE(NULLIF(UPPER(TRIM(@Nombres)), ''), Nombres),
+            PrimerApellido = COALESCE(NULLIF(UPPER(TRIM(@PrimerApellido)), ''), PrimerApellido),
+            SegundoApellido = COALESCE(UPPER(TRIM(@SegundoApellido)), SegundoApellido),
             CURP = COALESCE(NULLIF(UPPER(TRIM(@CURP)), ''), CURP),
+            RFC = COALESCE(NULLIF(UPPER(TRIM(@RFC)), ''), RFC),
             Telefono = COALESCE(NULLIF(TRIM(@Telefono), ''), Telefono),
             Correo = COALESCE(NULLIF(LOWER(TRIM(@Correo)), ''), Correo),
             FechaNacimiento = COALESCE(@FechaNacimiento, FechaNacimiento),
@@ -2100,8 +2110,8 @@ BEGIN
             (Nombres, PrimerApellido, SegundoApellido, Telefono, Correo,
              FechaNacimiento, FechaInscripcion, IdSucursal, IdEstatus)
         VALUES
-            (TRIM(@Nombres), TRIM(@PrimerApellido), TRIM(@SegundoApellido), TRIM(@Telefono),
-             LOWER(TRIM(@Correo)), @FechaNacimiento, CAST(GETDATE() AS DATE), @IdSucursal, ISNULL(@IdEstatus, 1));
+            (UPPER(TRIM(@Nombres)), UPPER(TRIM(@PrimerApellido)), UPPER(TRIM(@SegundoApellido)), TRIM(@Telefono),
+             LOWER(TRIM(@Correo)), @FechaNacimiento, CAST(GETDATE() AS DATE), @IdSucursal, 4);
 
         SET @IdCliente = SCOPE_IDENTITY();
 
@@ -2109,7 +2119,9 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresNuevos, IdUsuario)
         VALUES ('CLIENTE', @IdCliente, 'INSERT', @ValoresNuevos, @IdUsuario);
 
-        SELECT 'Socio registrado correctamente.' AS Mensaje, 'success' AS TipoMensaje;
+        SELECT CONCAT('Socio registrado con folio ', Folio, '. Queda en estatus Pendiente: aún falta registrar su expediente médico y contratar su membresía para poder activarlo.') AS Mensaje,
+               'success' AS TipoMensaje
+        FROM dbo.CLIENTE WHERE IdCliente = @IdCliente;
     END
 
     IF @Accion = 2 -- Consultar por Id
@@ -2151,6 +2163,12 @@ BEGIN
             RETURN;
         END
 
+        IF @IdEstatus IN (1, 4) AND EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus <> @IdEstatus)
+        BEGIN
+            SELECT 'El estatus Activo o Pendiente no se asigna manualmente. Para reactivar al socio utilice el botón Reactivar.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.CLIENTE WHERE IdCliente = @IdCliente FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         -- Regla 6.1: Al pasar a Inactivo (2) o Suspendido (3), cancelar automáticamente reservas futuras confirmadas
@@ -2167,9 +2185,9 @@ BEGIN
         END
 
         UPDATE dbo.CLIENTE
-        SET Nombres = COALESCE(NULLIF(TRIM(@Nombres), ''), Nombres),
-            PrimerApellido = COALESCE(NULLIF(TRIM(@PrimerApellido), ''), PrimerApellido),
-            SegundoApellido = COALESCE(TRIM(@SegundoApellido), SegundoApellido),
+        SET Nombres = COALESCE(NULLIF(UPPER(TRIM(@Nombres)), ''), Nombres),
+            PrimerApellido = COALESCE(NULLIF(UPPER(TRIM(@PrimerApellido)), ''), PrimerApellido),
+            SegundoApellido = COALESCE(UPPER(TRIM(@SegundoApellido)), SegundoApellido),
             Telefono = COALESCE(NULLIF(TRIM(@Telefono), ''), Telefono),
             Correo = COALESCE(NULLIF(LOWER(TRIM(@Correo)), ''), Correo),
             FechaNacimiento = COALESCE(@FechaNacimiento, FechaNacimiento),
@@ -2227,14 +2245,42 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.CLIENTE WHERE IdCliente = @IdCliente FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.CLIENTE
-        SET IdEstatus = 1 -- Activo
+        SET IdEstatus = 4
         WHERE IdCliente = @IdCliente;
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.CLIENTE WHERE IdCliente = @IdCliente FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('CLIENTE', @IdCliente, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
 
-        SELECT 'Socio reactivado correctamente.' AS Mensaje, 'success' AS TipoMensaje;
+        EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
+
+        IF EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 1)
+            SELECT 'Socio reactivado correctamente.' AS Mensaje, 'success' AS TipoMensaje;
+        ELSE
+            SELECT 'El socio quedó en estatus Pendiente: necesita expediente médico y una suscripción activa o pendiente para activarse.' AS Mensaje, 'warning' AS TipoMensaje;
+    END
+
+    IF @Accion = 7
+    BEGIN
+        SELECT @ValoresAnteriores = (SELECT * FROM dbo.CLIENTE WHERE IdCliente = @IdCliente FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
+
+        UPDATE dbo.CLIENTE
+        SET IdEstatus = 1
+        WHERE IdCliente = @IdCliente
+          AND IdEstatus = 4
+          AND EXISTS (SELECT 1 FROM dbo.EXPEDIENTE WHERE IdCliente = @IdCliente)
+          AND EXISTS (
+              SELECT 1 FROM dbo.SUSCRIPCION
+              WHERE IdCliente = @IdCliente AND IdEstatus IN (1, 2)
+                AND FechaVencimiento >= CAST(GETDATE() AS DATE)
+          );
+
+        IF @@ROWCOUNT > 0
+        BEGIN
+            SELECT @ValoresNuevos = (SELECT * FROM dbo.CLIENTE WHERE IdCliente = @IdCliente FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
+            INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
+            VALUES ('CLIENTE', @IdCliente, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
+        END
     END
 END;
 GO
@@ -2289,7 +2335,12 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresNuevos, IdUsuario)
         VALUES ('EXPEDIENTE', @IdExpediente, 'INSERT', @ValoresNuevos, @IdUsuario);
 
-        SELECT 'Expediente médico registrado correctamente.' AS Mensaje, 'success' AS TipoMensaje;
+        EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
+
+        IF EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 4)
+            SELECT 'Expediente médico registrado correctamente. El socio sigue Pendiente hasta contratar su membresía.' AS Mensaje, 'success' AS TipoMensaje;
+        ELSE
+            SELECT 'Expediente médico registrado correctamente.' AS Mensaje, 'success' AS TipoMensaje;
     END
 
     IF @Accion = 2 -- Consultar por Id
@@ -2451,7 +2502,7 @@ BEGIN
         END
 
         INSERT INTO dbo.EJERCICIO (Nombre, Descripcion, IdGrupoMuscular, IdDificultad)
-        VALUES (TRIM(@Nombre), TRIM(@Descripcion), @IdGrupoMuscular, @IdDificultad);
+        VALUES (UPPER(TRIM(@Nombre)), TRIM(@Descripcion), @IdGrupoMuscular, @IdDificultad);
         SET @IdEjercicio = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.EJERCICIO WHERE IdEjercicio = @IdEjercicio FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -2497,7 +2548,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.EJERCICIO WHERE IdEjercicio = @IdEjercicio FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.EJERCICIO
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion),
             IdGrupoMuscular = COALESCE(@IdGrupoMuscular, IdGrupoMuscular),
             IdDificultad = COALESCE(@IdDificultad, IdDificultad)
@@ -2590,11 +2641,14 @@ BEGIN
     DECLARE @ValoresAnteriores NVARCHAR(MAX);
     DECLARE @ValoresNuevos     NVARCHAR(MAX);
 
+    IF @Accion <> 6
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
     IF @Accion = 1 -- Contratar suscripción
     BEGIN
-        IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente)
+        IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus IN (1, 4))
         BEGIN
-            SELECT 'El socio seleccionado no existe.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El socio seleccionado no existe o se encuentra inactivo/suspendido.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -2605,17 +2659,20 @@ BEGIN
         END
 
         -- Regla 6.2: Un socio solo puede tener una suscripción activa
-        IF @IdEstatus = 2 AND EXISTS (
+        IF EXISTS (
             SELECT 1 FROM dbo.SUSCRIPCION
-            WHERE IdCliente = @IdCliente AND IdEstatus = 2
+            WHERE IdCliente = @IdCliente AND IdEstatus IN (1, 2)
         )
         BEGIN
-            SELECT 'El socio ya cuenta con una suscripción activa. Para renovar, finalice o cancele la anterior.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El socio ya cuenta con una suscripción activa o pendiente. Para renovar, finalice o cancele la anterior.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
+        SET @FechaInicio = COALESCE(@FechaInicio, CAST(GETDATE() AS DATE));
+        SET @IdEstatus = CASE WHEN @FechaInicio > CAST(GETDATE() AS DATE) THEN 1 ELSE 2 END;
+
         INSERT INTO dbo.SUSCRIPCION (FechaInicio, IdCliente, IdMembresia, IdEstatus)
-        VALUES (COALESCE(@FechaInicio, CAST(GETDATE() AS DATE)), @IdCliente, @IdMembresia, ISNULL(@IdEstatus, 2));
+        VALUES (@FechaInicio, @IdCliente, @IdMembresia, @IdEstatus);
 
         SET @IdSuscripcion = SCOPE_IDENTITY();
 
@@ -2623,7 +2680,12 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'INSERT', @ValoresNuevos, @IdUsuario);
 
-        SELECT 'Suscripción registrada correctamente.' AS Mensaje, 'success' AS TipoMensaje;
+        EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
+
+        IF @IdEstatus = 1
+            SELECT CONCAT('Suscripción registrada como Pendiente porque inicia el ', FORMAT(@FechaInicio, 'dd/MM/yyyy'), '; se activará automáticamente en esa fecha.') AS Mensaje, 'success' AS TipoMensaje;
+        ELSE
+            SELECT 'Suscripción registrada como Activa porque su fecha de inicio ya está en curso.' AS Mensaje, 'success' AS TipoMensaje;
     END
 
     IF @Accion = 2 -- Por Id
@@ -2669,12 +2731,18 @@ BEGIN
 
     IF @Accion = 4 -- Modificar
     BEGIN
-        IF @IdEstatus = 2 AND EXISTS (
+        IF @IdEstatus IN (1, 2)
+            SET @IdEstatus = CASE
+                                 WHEN COALESCE(@FechaInicio, (SELECT FechaInicio FROM dbo.SUSCRIPCION WHERE IdSuscripcion = @IdSuscripcion)) > CAST(GETDATE() AS DATE) THEN 1
+                                 ELSE 2
+                             END;
+
+        IF @IdEstatus IN (1, 2) AND EXISTS (
             SELECT 1 FROM dbo.SUSCRIPCION
-            WHERE IdCliente = @IdCliente AND IdEstatus = 2 AND IdSuscripcion <> @IdSuscripcion
+            WHERE IdCliente = @IdCliente AND IdEstatus IN (1, 2) AND IdSuscripcion <> @IdSuscripcion
         )
         BEGIN
-            SELECT 'El socio ya cuenta con otra suscripción activa.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El socio ya cuenta con otra suscripción activa o pendiente.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -2689,6 +2757,8 @@ BEGIN
         SELECT @ValoresNuevos = (SELECT * FROM dbo.SUSCRIPCION WHERE IdSuscripcion = @IdSuscripcion FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
+
+        EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
 
         SELECT 'Suscripción actualizada correctamente.' AS Mensaje, 'success' AS TipoMensaje;
     END
@@ -2713,6 +2783,14 @@ BEGIN
 
         SELECT 'Suscripción cancelada correctamente. Se conserva en el historial pero impide acceso inmediato.' AS Mensaje, 'success' AS TipoMensaje;
     END
+
+    IF @Accion = 6
+    BEGIN
+        UPDATE dbo.SUSCRIPCION
+        SET IdEstatus = 2
+        WHERE IdEstatus = 1
+          AND FechaInicio <= CAST(GETDATE() AS DATE);
+    END
 END;
 GO
 
@@ -2734,6 +2812,8 @@ BEGIN
 
     IF @Accion = 1 -- Registrar entrada (Regla 6.3)
     BEGIN
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
         -- 1. Validar socio activo
         IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 1)
         BEGIN
@@ -2867,7 +2947,38 @@ BEGIN
       AND (Fecha < CAST(GETDATE() AS DATE)
            OR (Fecha = CAST(GETDATE() AS DATE) AND HoraFin <= CAST(GETDATE() AS TIME)));
 
-    IF @Accion = 1 -- Insertar clase
+    IF @Accion = 4
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM dbo.CLASE WHERE IdClase = @IdClase)
+        BEGIN
+            SELECT 'La clase no existe.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF EXISTS (
+            SELECT 1 FROM dbo.CLASE
+            WHERE IdClase = @IdClase
+              AND (IdEstatus = 3 OR Fecha < CAST(GETDATE() AS DATE)
+                   OR (Fecha = CAST(GETDATE() AS DATE) AND HoraInicio <= CAST(GETDATE() AS TIME)))
+        )
+        BEGIN
+            SELECT 'No se pueden modificar clases finalizadas o que ya han iniciado.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        SELECT @Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+               @Fecha = COALESCE(@Fecha, Fecha),
+               @HoraInicio = COALESCE(@HoraInicio, HoraInicio),
+               @HoraFin = COALESCE(@HoraFin, HoraFin),
+               @CupoMaximo = COALESCE(@CupoMaximo, CupoMaximo),
+               @IdSalon = COALESCE(@IdSalon, IdSalon),
+               @IdEmpleado = COALESCE(@IdEmpleado, IdEmpleado),
+               @IdEspecialidad = COALESCE(@IdEspecialidad, IdEspecialidad),
+               @IdEstatus = COALESCE(@IdEstatus, IdEstatus)
+        FROM dbo.CLASE WHERE IdClase = @IdClase;
+    END
+
+    IF @Accion IN (1, 4)
     BEGIN
         IF @Nombre IS NULL OR TRIM(@Nombre) = '' OR @Fecha IS NULL OR @HoraInicio IS NULL
            OR @HoraFin IS NULL OR @CupoMaximo IS NULL OR @IdSalon IS NULL OR @IdEmpleado IS NULL
@@ -2895,17 +3006,38 @@ BEGIN
             RETURN;
         END
 
-        -- Validar entrenador activo
-        IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado AND IdEstatus = 1)
+        IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado AND IdEstatus = 1 AND IdPuesto = 2)
         BEGIN
-            SELECT 'El empleado seleccionado no se encuentra activo.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El empleado seleccionado no es un entrenador activo.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF DATEDIFF(DAY, '19000101', @Fecha) % 7 >= 5
+        BEGIN
+            SELECT 'Las clases solo pueden programarse de lunes a viernes.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF EXISTS (
+            SELECT 1 FROM dbo.SALON Sa
+            INNER JOIN dbo.SUCURSAL Su ON Sa.IdSucursal = Su.IdSucursal
+            WHERE Sa.IdSalon = @IdSalon
+              AND (@HoraInicio < Su.HoraApertura OR @HoraFin > Su.HoraCierre)
+        )
+        BEGIN
+            SELECT CONCAT('El horario de la clase debe estar dentro del horario de la sucursal (',
+                          FORMAT(Su.HoraApertura, N'hh\:mm'), ' a ', FORMAT(Su.HoraCierre, N'hh\:mm'), ').') AS Mensaje,
+                   'warning' AS TipoMensaje
+            FROM dbo.SALON Sa
+            INNER JOIN dbo.SUCURSAL Su ON Sa.IdSucursal = Su.IdSucursal
+            WHERE Sa.IdSalon = @IdSalon;
             RETURN;
         END
 
         -- Validar que no haya traslapes de horario en el salón
         IF EXISTS (
             SELECT 1 FROM dbo.CLASE
-            WHERE Fecha = @Fecha AND IdSalon = @IdSalon AND IdEstatus = 1
+            WHERE Fecha = @Fecha AND IdSalon = @IdSalon AND IdEstatus = 1 AND IdClase <> ISNULL(@IdClase, 0)
               AND HoraInicio < @HoraFin AND HoraFin > @HoraInicio
         )
         BEGIN
@@ -2916,18 +3048,21 @@ BEGIN
         -- Validar que el instructor no tenga otra clase simultánea
         IF EXISTS (
             SELECT 1 FROM dbo.CLASE
-            WHERE Fecha = @Fecha AND IdEmpleado = @IdEmpleado AND IdEstatus = 1
+            WHERE Fecha = @Fecha AND IdEmpleado = @IdEmpleado AND IdEstatus = 1 AND IdClase <> ISNULL(@IdClase, 0)
               AND HoraInicio < @HoraFin AND HoraFin > @HoraInicio
         )
         BEGIN
             SELECT 'El entrenador ya cuenta con otra clase asignada en ese horario.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
+    END
 
+    IF @Accion = 1 -- Insertar clase
+    BEGIN
         INSERT INTO dbo.CLASE
             (Nombre, Fecha, HoraInicio, HoraFin, CupoMaximo, IdSalon, IdEmpleado, IdEspecialidad, IdEstatus)
         VALUES
-            (TRIM(@Nombre), @Fecha, @HoraInicio, @HoraFin, @CupoMaximo, @IdSalon, @IdEmpleado, @IdEspecialidad, ISNULL(@IdEstatus, 1));
+            (UPPER(TRIM(@Nombre)), @Fecha, @HoraInicio, @HoraFin, @CupoMaximo, @IdSalon, @IdEmpleado, @IdEspecialidad, ISNULL(@IdEstatus, 1));
 
         SET @IdClase = SCOPE_IDENTITY();
 
@@ -2981,71 +3116,18 @@ BEGIN
 
     IF @Accion = 4 -- Modificar clase
     BEGIN
-        IF NOT EXISTS (SELECT 1 FROM dbo.CLASE WHERE IdClase = @IdClase)
-        BEGIN
-            SELECT 'La clase no existe.' AS Mensaje, 'warning' AS TipoMensaje;
-            RETURN;
-        END
-
-        IF EXISTS (
-            SELECT 1 FROM dbo.CLASE
-            WHERE IdClase = @IdClase
-              AND (IdEstatus = 3 OR Fecha < CAST(GETDATE() AS DATE)
-                   OR (Fecha = CAST(GETDATE() AS DATE) AND HoraInicio <= CAST(GETDATE() AS TIME)))
-        )
-        BEGIN
-            SELECT 'No se pueden modificar clases finalizadas o que ya han iniciado.' AS Mensaje, 'warning' AS TipoMensaje;
-            RETURN;
-        END
-
-        DECLARE @FechaF DATE, @HoraIniF TIME, @HoraFinF TIME, @SalonF INT, @EmpF INT, @EspF TINYINT, @EstF TINYINT;
-        SELECT @FechaF = COALESCE(@Fecha, Fecha),
-               @HoraIniF = COALESCE(@HoraInicio, HoraInicio),
-               @HoraFinF = COALESCE(@HoraFin, HoraFin),
-               @SalonF = COALESCE(@IdSalon, IdSalon),
-               @EmpF = COALESCE(@IdEmpleado, IdEmpleado),
-               @EspF = COALESCE(@IdEspecialidad, IdEspecialidad),
-               @EstF = COALESCE(@IdEstatus, IdEstatus)
-        FROM dbo.CLASE WHERE IdClase = @IdClase;
-
-        IF @HoraFinF <= @HoraIniF
-        BEGIN
-            SELECT 'La hora de fin debe ser posterior a la hora de inicio.' AS Mensaje, 'warning' AS TipoMensaje;
-            RETURN;
-        END
-
-        IF EXISTS (
-            SELECT 1 FROM dbo.CLASE
-            WHERE Fecha = @FechaF AND IdSalon = @SalonF AND IdEstatus = 1 AND IdClase <> @IdClase
-              AND HoraInicio < @HoraFinF AND HoraFin > @HoraIniF
-        )
-        BEGIN
-            SELECT 'El salón ya cuenta con una clase programada en ese horario.' AS Mensaje, 'warning' AS TipoMensaje;
-            RETURN;
-        END
-
-        IF EXISTS (
-            SELECT 1 FROM dbo.CLASE
-            WHERE Fecha = @FechaF AND IdEmpleado = @EmpF AND IdEstatus = 1 AND IdClase <> @IdClase
-              AND HoraInicio < @HoraFinF AND HoraFin > @HoraIniF
-        )
-        BEGIN
-            SELECT 'El entrenador ya cuenta con otra clase asignada en ese horario.' AS Mensaje, 'warning' AS TipoMensaje;
-            RETURN;
-        END
-
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.CLASE WHERE IdClase = @IdClase FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.CLASE
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
-            Fecha = @FechaF,
-            HoraInicio = @HoraIniF,
-            HoraFin = @HoraFinF,
-            CupoMaximo = COALESCE(@CupoMaximo, CupoMaximo),
-            IdSalon = @SalonF,
-            IdEmpleado = @EmpF,
-            IdEspecialidad = @EspF,
-            IdEstatus = @EstF
+        SET Nombre = UPPER(TRIM(@Nombre)),
+            Fecha = @Fecha,
+            HoraInicio = @HoraInicio,
+            HoraFin = @HoraFin,
+            CupoMaximo = @CupoMaximo,
+            IdSalon = @IdSalon,
+            IdEmpleado = @IdEmpleado,
+            IdEspecialidad = @IdEspecialidad,
+            IdEstatus = @IdEstatus
         WHERE IdClase = @IdClase;
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.CLASE WHERE IdClase = @IdClase FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -3103,6 +3185,8 @@ BEGIN
 
     IF @Accion = 1 -- Crear reserva
     BEGIN
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
         -- 1. Validar socio activo
         IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 1)
         BEGIN
@@ -3343,8 +3427,21 @@ BEGIN
             RETURN;
         END
 
+        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.SUSCRIPCION
+            WHERE IdCliente = @IdCliente
+              AND IdEstatus = 2
+              AND CAST(GETDATE() AS DATE) BETWEEN FechaInicio AND FechaVencimiento
+        )
+        BEGIN
+            SELECT 'El socio no cuenta con una suscripción activa y vigente.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
         INSERT INTO dbo.RUTINA (Nombre, FechaAsignacion, Objetivo, IdCliente, IdEmpleado, IdEstatus)
-        VALUES (TRIM(@Nombre), COALESCE(@FechaAsignacion, CAST(GETDATE() AS DATE)), TRIM(@Objetivo), @IdCliente, @IdEmpleado, ISNULL(@IdEstatus, 1));
+        VALUES (UPPER(TRIM(@Nombre)), COALESCE(@FechaAsignacion, CAST(GETDATE() AS DATE)), TRIM(@Objetivo), @IdCliente, @IdEmpleado, ISNULL(@IdEstatus, 1));
         SET @IdRutina = SCOPE_IDENTITY();
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.RUTINA WHERE IdRutina = @IdRutina FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -3401,7 +3498,7 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.RUTINA WHERE IdRutina = @IdRutina FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.RUTINA
-        SET Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
             Objetivo = COALESCE(NULLIF(TRIM(@Objetivo), ''), Objetivo),
             IdEstatus = COALESCE(@IdEstatus, IdEstatus)
         WHERE IdRutina = @IdRutina;
@@ -3617,6 +3714,7 @@ BEGIN
     SELECT E.IdEmpleado,
            CONCAT(E.PrimerApellido, ' ', ISNULL(E.SegundoApellido, ''), ', ', E.Nombres) AS NombreCompleto,
            E.CURP,
+           E.RFC,
            P.Nombre AS Puesto,
            ISNULL((
                SELECT STRING_AGG(Esp.Nombre, ', ')

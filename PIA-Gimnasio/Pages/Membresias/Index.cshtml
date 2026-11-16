@@ -91,13 +91,21 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Suscripcion.IdEstatus" class="form-label small fw-semibold">Estatus</label>
-                        <select asp-for="Suscripcion.IdEstatus" class="form-select form-select-sm">
-                            <option value="2">Activa</option>
-                            <option value="1">Pendiente</option>
-                            <option value="3">Vencida</option>
-                            <option value="4">Cancelada</option>
-                        </select>
+                        <label class="form-label small fw-semibold">Estatus</label>
+                        @if (Model.Suscripcion.IdSuscripcion > 0)
+                        {
+                            <select asp-for="Suscripcion.IdEstatus" class="form-select form-select-sm">
+                                <option value="2">Activa</option>
+                                <option value="1">Pendiente</option>
+                                <option value="3">Vencida</option>
+                                <option value="4">Cancelada</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <input type="text" class="form-control form-control-sm bg-light" value="Se asigna según la fecha de inicio" readonly />
+                        }
+                        <div class="form-text small text-muted">Si la fecha de inicio es hoy o anterior la suscripción queda Activa; si es futura queda Pendiente y se activa automáticamente al llegar esa fecha.</div>
                     </div>
 
                     <div class="d-flex justify-content-between pt-2">

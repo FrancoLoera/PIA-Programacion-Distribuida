@@ -51,6 +51,7 @@
                         <div class="mb-3">
                             <label asp-for="Clase.Fecha" class="form-label small fw-semibold">Fecha *</label>
                             <input asp-for="Clase.Fecha" type="date" class="form-control form-control-sm" required />
+                            <div class="form-text small text-muted">Solo de lunes a viernes y dentro del horario de la sucursal del salón.</div>
                             <span asp-validation-for="Clase.Fecha" class="text-danger small"></span>
                         </div>
 

@@ -30,7 +30,7 @@ namespace PIA_Gimnasio.Logica
                 new SqlParameter("@Correo", Valor(cliente.Correo?.ToLower().Trim())),
                 new SqlParameter("@FechaNacimiento", cliente.FechaNacimiento.HasValue ? (object)cliente.FechaNacimiento.Value.Date : DBNull.Value),
                 new SqlParameter("@IdSucursal", cliente.IdSucursal),
-                new SqlParameter("@IdEstatus", cliente.IdEstatus),
+                new SqlParameter("@IdEstatus", cliente.IdEstatus.HasValue ? (object)cliente.IdEstatus.Value : DBNull.Value),
                 new SqlParameter("@IdUsuario", idUsuario)
             };
 

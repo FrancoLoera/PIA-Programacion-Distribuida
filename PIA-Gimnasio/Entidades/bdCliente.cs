@@ -42,7 +42,7 @@ namespace PIA_Gimnasio.Entidades
 
         public string? Sucursal { get; set; }
 
-        public byte IdEstatus { get; set; } = 1;
+        public byte? IdEstatus { get; set; }
 
         public string? Estatus { get; set; }
 

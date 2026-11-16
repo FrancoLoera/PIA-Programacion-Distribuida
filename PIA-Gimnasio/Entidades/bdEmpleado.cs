@@ -23,6 +23,10 @@ namespace PIA_Gimnasio.Entidades
         [StringLength(18, MinimumLength = 18, ErrorMessage = "CURP debe tener 18 caracteres")]
         public string CURP { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "RFC es obligatorio")]
+        [StringLength(13, MinimumLength = 13, ErrorMessage = "RFC debe tener 13 caracteres")]
+        public string RFC { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Teléfono es obligatorio")]
         [StringLength(20, ErrorMessage = "Teléfono no puede exceder 20 caracteres")]
         public string Telefono { get; set; } = string.Empty;

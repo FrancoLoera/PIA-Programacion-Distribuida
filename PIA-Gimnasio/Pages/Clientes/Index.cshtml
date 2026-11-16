@@ -84,7 +84,17 @@
                     <span asp-validation-for="Cliente.IdSucursal" class="text-danger small"></span>
                 </div>
 
-                @if (Model.Cliente.IdCliente != 0 && User.IsInRole("Administrador"))
+                @if (Model.Cliente.IdCliente == 0 || Model.Cliente.IdEstatus == 4)
+                {
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Estatus</label>
+                        <select class="form-select" disabled>
+                            <option selected>Pendiente</option>
+                        </select>
+                        <div class="form-text small">El socio queda Pendiente hasta tener expediente médico y membresía contratada; mientras tanto no puede ingresar, reservar clases ni recibir rutinas.</div>
+                    </div>
+                }
+                else if (User.IsInRole("Administrador"))
                 {
                     <div class="col-md-3">
                         <label asp-for="Cliente.IdEstatus" class="form-label small fw-semibold">Estatus</label>
@@ -139,6 +149,7 @@
                     <!option value="1" @(Model.FiltroEstatus == 1 ? "selected" : "")>Activo</!option>
                     <!option value="2" @(Model.FiltroEstatus == 2 ? "selected" : "")>Inactivo</!option>
                     <!option value="3" @(Model.FiltroEstatus == 3 ? "selected" : "")>Suspendido</!option>
+                    <!option value="4" @(Model.FiltroEstatus == 4 ? "selected" : "")>Pendiente</!option>
                 </select>
             </div>
             <div class="col-md-2 d-flex gap-1">
@@ -202,6 +213,10 @@
                                 {
                                     <span class="badge bg-secondary">Inactivo</span>
                                 }
+                                else if (idEstatus == 4)
+                                {
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                }
                                 else
                                 {
                                     <span class="badge bg-light text-dark border">Suspendido</span>
@@ -212,7 +227,7 @@
                                     <i class="bi bi-pencil me-1"></i>Editar
                                 </a>
 
-                                @if (idEstatus == 1)
+                                @if (idEstatus == 1 || idEstatus == 4)
                                 {
                                     <form method="post" asp-page-handler="Baja" asp-route-id="@id" class="d-inline"
                                           onsubmit="return confirm('¿Dar de baja a este socio? Se cancelarán sus reservas futuras y se conservará su historial.');">

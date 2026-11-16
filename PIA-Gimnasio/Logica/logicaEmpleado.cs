@@ -26,6 +26,7 @@ namespace PIA_Gimnasio.Logica
                 new SqlParameter("@PrimerApellido", Valor(e.PrimerApellido)),
                 new SqlParameter("@SegundoApellido", Valor(e.SegundoApellido)),
                 new SqlParameter("@CURP", Valor(e.CURP)),
+                new SqlParameter("@RFC", Valor(e.RFC)),
                 new SqlParameter("@Telefono", Valor(e.Telefono)),
                 new SqlParameter("@Correo", Valor(e.Correo)),
                 new SqlParameter("@FechaNacimiento", e.FechaNacimiento),
@@ -57,6 +58,7 @@ namespace PIA_Gimnasio.Logica
                 PrimerApellido = r["PrimerApellido"]?.ToString() ?? "",
                 SegundoApellido = r["SegundoApellido"] == DBNull.Value ? null : r["SegundoApellido"].ToString(),
                 CURP = r["CURP"]?.ToString() ?? "",
+                RFC = r["RFC"]?.ToString() ?? "",
                 Telefono = r["Telefono"]?.ToString() ?? "",
                 Correo = r["Correo"]?.ToString() ?? "",
                 FechaNacimiento = (DateTime)r["FechaNacimiento"],
@@ -64,12 +66,11 @@ namespace PIA_Gimnasio.Logica
                 IdPuesto = Convert.ToByte(r["IdPuesto"]),
                 IdSucursal = Convert.ToInt16(r["IdSucursal"]),
                 IdEstatus = Convert.ToByte(r["IdEstatus"]),
-                IdEspecialidad = r["IdEspecialidad"] == DBNull.Value ? (byte?)null : Convert.ToByte(r["IdEspecialidad"]),
                 // Aux fields (populated in query via joins)
                 Estatus = r["Estatus"]?.ToString(),
                 Puesto = r["Puesto"]?.ToString(),
                 Sucursal = r["Sucursal"]?.ToString(),
-                Especialidad = r["Especialidad"]?.ToString()
+                Especialidad = r["Especialidades"]?.ToString()
             };
         }
 

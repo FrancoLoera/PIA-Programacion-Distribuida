@@ -170,7 +170,7 @@ namespace PIA_Gimnasio.Pages.Expedientes
         {
             Expedientes = _logicaExpediente.Consultar(FiltroCliente, FiltroTipoSangre);
             CatalogoCondiciones = _logicaExpediente.CatalogoCondiciones();
-            Socios = _logicaCliente.Consultar(null, null, 1);
+            Socios = _logicaCliente.Consultar();
 
             if (ExpedienteDetalle.HasValue && ExpedienteDetalle > 0)
             {

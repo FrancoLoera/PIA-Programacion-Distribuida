@@ -87,7 +87,7 @@ namespace PIA_Gimnasio.Pages.Membresias
         {
             Suscripciones = _logicaMembresia.ConsultarSuscripciones(FiltroCliente, FiltroPlan, FiltroEstatus);
             Planes = _logicaMembresia.ConsultarPlanes();
-            Clientes = _logicaCliente.Consultar(null, null, 1); // Solo clientes activos para asignación
+            Clientes = _logicaCliente.Consultar();
         }
 
         private int ObtenerIdUsuario()

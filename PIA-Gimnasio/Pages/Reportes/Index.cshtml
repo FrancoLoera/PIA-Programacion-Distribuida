@@ -141,6 +141,8 @@
                         <option value="2" selected="@selEC2">Inactivo</option>
                         @{ var selEC3 = Model.FiltroEstatusCliente == 3 ? "selected" : null; }
                         <option value="3" selected="@selEC3">Suspendido</option>
+                        @{ var selEC4 = Model.FiltroEstatusCliente == 4 ? "selected" : null; }
+                        <option value="4" selected="@selEC4">Pendiente</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -437,7 +439,7 @@
                                 <th>Sucursal</th>
                                 <th>Entrada</th>
                                 <th>Salida</th>
-                                <th class="text-center">Tiempo (Min)</th>
+                                <th class="text-center">Permanencia</th>
                                 <th>Estatus</th>
                             </tr>
                         </thead>
@@ -453,9 +455,9 @@
                                     <td class="small">@r["Sucursal"]</td>
                                     <td class="small">@Convert.ToDateTime(r["FechaHoraEntrada"]).ToString("dd/MM/yyyy HH:mm")</td>
                                     <td class="small">@salida</td>
-                                    <td class="text-center fw-semibold">@r["MinutosEnInstalaciones"] min</td>
+                                    <td class="text-center fw-semibold">@r["TiempoFormateado"]</td>
                                     <td>
-                                        <span class="badge @(r["Estatus"]?.ToString() == "En curso" ? "bg-warning text-dark" : "bg-dark text-white")">
+                                        <span class="badge @(r["Estatus"]?.ToString() == "Pendiente de salida" ? "bg-warning text-dark" : "bg-dark text-white")">
                                             @r["Estatus"]
                                         </span>
                                     </td>
@@ -543,6 +545,7 @@
                         <thead class="table-light small">
                             <tr>
                                 <th>Nombre Completo</th>
+                                <th>CURP / RFC</th>
                                 <th>Puesto</th>
                                 <th>Sucursal</th>
                                 <th>Especialidades</th>
@@ -556,6 +559,10 @@
                             {
                                 <tr>
                                     <td class="fw-semibold">@r["NombreCompleto"]</td>
+                                    <td class="small">
+                                        <div>@r["CURP"]</div>
+                                        <span class="text-muted">@r["RFC"]</span>
+                                    </td>
                                     <td><span class="badge bg-light text-dark border">@r["Puesto"]</span></td>
                                     <td class="small">@r["Sucursal"]</td>
                                     <td class="small text-muted">@r["Especialidades"]</td>
