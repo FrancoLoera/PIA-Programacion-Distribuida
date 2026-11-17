@@ -122,7 +122,7 @@ namespace PIA_Gimnasio.Pages.Reservas
             // Consultar clases programadas (estatus = 1) o todas según el rol
             Clases = _logicaClase.Consultar(null, null, null, idEmpleadoFiltro, null);
             Reservas = _logicaReserva.Consultar(FiltroClase, FiltroCliente, null, FiltroEstatus, idEmpleadoFiltro);
-            Socios = _logicaCliente.Consultar(null, null, 1); // Socios activos
+            Socios = _logicaCliente.ConsultarConSuscripcionVigente();
         }
 
         private int ObtenerIdUsuario()

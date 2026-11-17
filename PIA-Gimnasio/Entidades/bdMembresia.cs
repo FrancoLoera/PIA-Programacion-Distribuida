@@ -16,7 +16,7 @@ namespace PIA_Gimnasio.Entidades
         public string Nombre { get; set; } = "";
 
         [Required(ErrorMessage = "El precio es obligatorio.")]
-        [Range(0, 99999.99, ErrorMessage = "El precio debe ser mayor o igual a 0.")]
+        [Range(0.01, 99999.99, ErrorMessage = "El precio debe ser mayor a 0.")]
         public decimal Precio { get; set; }
 
         [Required(ErrorMessage = "La descripción es obligatoria.")]
@@ -25,7 +25,7 @@ namespace PIA_Gimnasio.Entidades
 
         public bool PermiteClases { get; set; } = false;
 
-        [Range(0, 50, ErrorMessage = "El máximo de clases por semana debe ser entre 0 y 50.")]
+        [Range(0, 5, ErrorMessage = "El máximo de clases por semana debe ser de 1 a 5.")]
         public byte MaxClasesSemana { get; set; } = 0;
 
         public bool SujetaAforo { get; set; } = false;

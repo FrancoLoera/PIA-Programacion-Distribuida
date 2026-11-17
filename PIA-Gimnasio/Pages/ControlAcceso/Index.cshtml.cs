@@ -120,7 +120,7 @@ namespace PIA_Gimnasio.Pages.ControlAcceso
             }
 
             Accesos = _logicaControlAcceso.Consultar(FiltroCliente, FiltroSucursal, fechaIni, fechaFin);
-            Socios = _logicaCliente.Consultar(null, null, 1); // Socios activos
+            Socios = _logicaCliente.ConsultarConSuscripcionVigente();
             Sucursales = _logicaSucursal.Consultar();
             SucursalesActivas = _logicaSucursal.Consultar(null, null, null, 1);
         }

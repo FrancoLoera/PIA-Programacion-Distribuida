@@ -74,6 +74,10 @@
                                 {
                                     foreach (System.Data.DataRow s in Model.Socios.Rows)
                                     {
+                                        if (!Convert.ToBoolean(s["PermiteClases"]))
+                                        {
+                                            continue;
+                                        }
                                         var idCli = s["IdCliente"]?.ToString();
                                         var folio = s["Folio"]?.ToString();
                                         var nomCli = $"{folio} &bull; {s["PrimerApellido"]} {s["Nombres"]}";

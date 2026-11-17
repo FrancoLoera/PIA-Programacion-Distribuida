@@ -1268,6 +1268,54 @@ BEGIN
     DECLARE @ValoresAnteriores NVARCHAR(MAX);
     DECLARE @ValoresNuevos     NVARCHAR(MAX);
 
+    IF @Accion = 4
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia)
+        BEGIN
+            SELECT 'La membresía no existe.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        SELECT @Nombre = COALESCE(NULLIF(TRIM(@Nombre), ''), Nombre),
+               @Precio = COALESCE(@Precio, Precio),
+               @Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion),
+               @PermiteClases = COALESCE(@PermiteClases, PermiteClases),
+               @MaxClasesSemana = COALESCE(@MaxClasesSemana, MaxClasesSemana),
+               @SujetaAforo = COALESCE(@SujetaAforo, SujetaAforo)
+        FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia;
+    END
+
+    IF @Accion IN (1, 4)
+    BEGIN
+        IF @Nombre IS NULL OR TRIM(@Nombre) = '' OR @Descripcion IS NULL OR TRIM(@Descripcion) = ''
+           OR @Precio IS NULL OR @PermiteClases IS NULL OR @SujetaAforo IS NULL
+        BEGIN
+            SELECT 'Todos los campos obligatorios deben ser completados.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF @Precio <= 0
+        BEGIN
+            SELECT 'El precio de la membresía debe ser mayor a cero.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF @PermiteClases = 0
+            SET @MaxClasesSemana = 0;
+
+        IF @PermiteClases = 1 AND (@MaxClasesSemana IS NULL OR @MaxClasesSemana NOT BETWEEN 1 AND 5)
+        BEGIN
+            SELECT 'Si la membresía permite clases, el máximo por semana debe ser de 1 a 5 (las clases son de lunes a viernes).' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF EXISTS (SELECT 1 FROM dbo.MEMBRESIA WHERE Nombre = UPPER(TRIM(@Nombre)) AND IdMembresia <> ISNULL(@IdMembresia, 0))
+        BEGIN
+            SELECT 'Ya existe una membresía con ese nombre.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+    END
+
     IF @Accion = 1 -- Insertar
     BEGIN
         INSERT INTO dbo.MEMBRESIA (Nombre, Precio, Descripcion, PermiteClases, MaxClasesSemana, SujetaAforo)
@@ -1300,12 +1348,12 @@ BEGIN
         SELECT @ValoresAnteriores = (SELECT * FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
 
         UPDATE dbo.MEMBRESIA
-        SET Nombre = COALESCE(NULLIF(UPPER(TRIM(@Nombre)), ''), Nombre),
-            Precio = COALESCE(@Precio, Precio),
-            Descripcion = COALESCE(NULLIF(TRIM(@Descripcion), ''), Descripcion),
-            PermiteClases = COALESCE(@PermiteClases, PermiteClases),
-            MaxClasesSemana = COALESCE(@MaxClasesSemana, MaxClasesSemana),
-            SujetaAforo = COALESCE(@SujetaAforo, SujetaAforo)
+        SET Nombre = UPPER(TRIM(@Nombre)),
+            Precio = @Precio,
+            Descripcion = TRIM(@Descripcion),
+            PermiteClases = @PermiteClases,
+            MaxClasesSemana = @MaxClasesSemana,
+            SujetaAforo = @SujetaAforo
         WHERE IdMembresia = @IdMembresia;
 
         SELECT @ValoresNuevos = (SELECT * FROM dbo.MEMBRESIA WHERE IdMembresia = @IdMembresia FOR JSON PATH, WITHOUT_ARRAY_WRAPPER);
@@ -2157,7 +2205,7 @@ BEGIN
         FROM dbo.CLIENTE WHERE IdCliente = @IdCliente;
     END
 
-    IF @Accion IN (2, 3)
+    IF @Accion IN (2, 3, 8)
         EXEC dbo.SP_SUSCRIPCION @Accion = 6;
 
     IF @Accion = 2 -- Consultar por Id
@@ -2333,6 +2381,22 @@ BEGIN
             INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
             VALUES ('CLIENTE', @IdCliente, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
         END
+    END
+
+    IF @Accion = 8
+    BEGIN
+        SELECT C.IdCliente, C.Folio, C.Nombres, C.PrimerApellido, C.SegundoApellido,
+               M.Nombre AS Membresia, M.PermiteClases,
+               CASE WHEN EXISTS (
+                   SELECT 1 FROM dbo.CONTROL_ACCESO CA
+                   WHERE CA.IdCliente = C.IdCliente AND CA.FechaHoraSalida IS NULL
+               ) THEN 1 ELSE 0 END AS DentroDelGimnasio
+        FROM dbo.CLIENTE C
+        INNER JOIN dbo.SUSCRIPCION S ON S.IdCliente = C.IdCliente AND S.IdEstatus = 2
+        INNER JOIN dbo.MEMBRESIA M ON S.IdMembresia = M.IdMembresia
+        WHERE C.IdEstatus = 1
+          AND CAST(GETDATE() AS DATE) BETWEEN S.FechaInicio AND S.FechaVencimiento
+        ORDER BY C.PrimerApellido, C.SegundoApellido, C.Nombres;
     END
 END;
 GO
@@ -2882,9 +2946,40 @@ BEGIN
     SET NOCOUNT ON;
     DECLARE @ValoresNuevos NVARCHAR(MAX);
 
+    IF @Accion <> 5
+        EXEC dbo.SP_CONTROL_ACCESO @Accion = 5;
+
+    IF @Accion = 5
+    BEGIN
+        UPDATE CA
+        SET FechaHoraSalida = CASE
+                                  WHEN Cierre.FechaHora < CA.FechaHoraEntrada THEN CA.FechaHoraEntrada
+                                  ELSE Cierre.FechaHora
+                              END
+        FROM dbo.CONTROL_ACCESO CA
+        INNER JOIN dbo.SUCURSAL S ON CA.IdSucursal = S.IdSucursal
+        CROSS APPLY (
+            SELECT DATEADD(SECOND, DATEDIFF(SECOND, CAST('00:00' AS TIME), S.HoraCierre),
+                           CAST(CAST(CA.FechaHoraEntrada AS DATE) AS DATETIME2)) AS FechaHora
+        ) Cierre
+        WHERE CA.FechaHoraSalida IS NULL
+          AND Cierre.FechaHora <= SYSDATETIME();
+    END
+
     IF @Accion = 1 -- Registrar entrada (Regla 6.3)
     BEGIN
         EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.SUCURSAL
+            WHERE IdSucursal = @IdSucursal
+              AND CAST(GETDATE() AS TIME) >= HoraApertura
+              AND CAST(GETDATE() AS TIME) < HoraCierre
+        )
+        BEGIN
+            SELECT 'La sucursal está fuera de su horario de atención. No se pueden registrar entradas.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
 
         -- 1. Validar socio activo
         IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 1)
@@ -3062,6 +3157,12 @@ BEGIN
         IF @HoraFin <= @HoraInicio
         BEGIN
             SELECT 'La hora de fin debe ser posterior a la hora de inicio.' AS Mensaje, 'warning' AS TipoMensaje;
+            RETURN;
+        END
+
+        IF DATEDIFF(MINUTE, @HoraInicio, @HoraFin) < 30
+        BEGIN
+            SELECT 'La clase debe durar al menos 30 minutos.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -3910,6 +4011,8 @@ CREATE OR ALTER PROCEDURE dbo.SP_REPORTE_CONTROL_ACCESO
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    EXEC dbo.SP_CONTROL_ACCESO @Accion = 5;
 
     SELECT CA.IdControlAcceso,
            C.Folio,
