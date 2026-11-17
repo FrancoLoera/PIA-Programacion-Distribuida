@@ -190,7 +190,9 @@ namespace PIA_Gimnasio.Logica
                     IdGrupoMuscular = Convert.ToInt16(r["IdGrupoMuscular"]),
                     GrupoMuscular = r["GrupoMuscular"]?.ToString(),
                     IdDificultad = Convert.ToByte(r["IdDificultad"]),
-                    Dificultad = r["Dificultad"]?.ToString()
+                    Dificultad = r["Dificultad"]?.ToString(),
+                    Contraindicaciones = r["Contraindicaciones"] == DBNull.Value ? null : r["Contraindicaciones"].ToString(),
+                    UsosEnRutinas = Convert.ToInt32(r["UsosEnRutinas"])
                 });
             }
             return list;

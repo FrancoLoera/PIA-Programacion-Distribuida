@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace PIA_Gimnasio.Entidades
 {
@@ -45,12 +46,26 @@ namespace PIA_Gimnasio.Entidades
     public class bdEjercicio
     {
         public int IdEjercicio { get; set; }
+
+        [Required(ErrorMessage = "El nombre del ejercicio es obligatorio.")]
+        [StringLength(80, ErrorMessage = "Máximo 80 caracteres.")]
         public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La descripción es obligatoria.")]
+        [StringLength(300, ErrorMessage = "Máximo 300 caracteres.")]
         public string? Descripcion { get; set; }
+
+        [Range(1, short.MaxValue, ErrorMessage = "Selecciona un grupo muscular.")]
         public short IdGrupoMuscular { get; set; }
+
         public string? GrupoMuscular { get; set; }
+
+        [Range(1, byte.MaxValue, ErrorMessage = "Selecciona una dificultad.")]
         public byte IdDificultad { get; set; }
+
         public string? Dificultad { get; set; }
+        public string? Contraindicaciones { get; set; }
+        public int UsosEnRutinas { get; set; }
     }
 
     public class bdGrupoMuscular

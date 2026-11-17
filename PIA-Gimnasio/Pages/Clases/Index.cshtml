@@ -77,6 +77,10 @@
                                     {
                                         foreach (System.Data.DataRow s in Model.Salones.Rows)
                                         {
+                                            if (Convert.ToByte(s["IdEstatusSucursal"]) != 1)
+                                            {
+                                                continue;
+                                            }
                                             var idSal = s["IdSalon"]?.ToString();
                                             var nomSal = s["NombreNumero"]?.ToString();
                                             var sucSal = s["Sucursal"]?.ToString();

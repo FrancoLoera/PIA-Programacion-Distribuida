@@ -1,0 +1,246 @@
+@page
+@model PIA_Gimnasio.Pages.Ejercicios.IndexModel
+@{
+    ViewData["Title"] = "Catálogo de Ejercicios";
+}
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-activity me-2"></i>Catálogo de Ejercicios</h3>
+        <p class="text-muted small mb-0">Ejercicios disponibles para las rutinas, con su grupo muscular, dificultad y contraindicaciones médicas.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+        <a asp-page="/Rutinas/Index" class="btn btn-outline-secondary btn-sm me-1">
+            <i class="bi bi-person-walking me-1"></i>Rutinas
+        </a>
+        <a asp-page="/Index" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Inicio
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    var alertClass = Model.TipoMensaje == "success" ? "alert-dark" : "alert-warning";
+    var iconClass = Model.TipoMensaje == "success" ? "bi-check-circle" : "bi-exclamation-triangle";
+    <div class="alert @alertClass alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi @iconClass me-2"></i>@Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+<div class="row g-4">
+    @if (Model.PuedeEditar)
+    {
+        <div class="col-lg-4">
+            <div class="card bg-white shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white py-3">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="bi @(Model.Ejercicio.IdEjercicio > 0 ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+                        @(Model.Ejercicio.IdEjercicio > 0 ? "Modificar Ejercicio" : "Nuevo Ejercicio")
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <form method="post" asp-page-handler="Guardar">
+                        <input type="hidden" asp-for="Ejercicio.IdEjercicio" />
+
+                        <div class="mb-3">
+                            <label asp-for="Ejercicio.Nombre" class="form-label small fw-semibold">Nombre *</label>
+                            <input asp-for="Ejercicio.Nombre" class="form-control form-control-sm" maxlength="80" required placeholder="Ej. Sentadilla búlgara" />
+                            <span asp-validation-for="Ejercicio.Nombre" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ejercicio.Descripcion" class="form-label small fw-semibold">Descripción *</label>
+                            <textarea asp-for="Ejercicio.Descripcion" class="form-control form-control-sm" rows="3" maxlength="300" required placeholder="Ejecución y recomendaciones del ejercicio..."></textarea>
+                            <span asp-validation-for="Ejercicio.Descripcion" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ejercicio.IdGrupoMuscular" class="form-label small fw-semibold">Grupo muscular *</label>
+                            <select asp-for="Ejercicio.IdGrupoMuscular" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona --</option>
+                                @foreach (var g in Model.Grupos)
+                                {
+                                    <option value="@g.IdGrupoMuscular">@g.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Ejercicio.IdGrupoMuscular" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ejercicio.IdDificultad" class="form-label small fw-semibold">Dificultad *</label>
+                            <select asp-for="Ejercicio.IdDificultad" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona --</option>
+                                @foreach (var d in Model.Dificultades)
+                                {
+                                    <option value="@d.IdDificultad">@d.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Ejercicio.IdDificultad" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-2">
+                            @if (Model.Ejercicio.IdEjercicio > 0)
+                            {
+                                <a asp-page="/Ejercicios/Index" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-x me-1"></i>Cancelar
+                                </a>
+                            }
+                            <button type="submit" class="btn btn-dark btn-sm ms-auto">
+                                <i class="bi bi-save me-1"></i>@(Model.Ejercicio.IdEjercicio > 0 ? "Guardar cambios" : "Registrar")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.EjercicioActual != null)
+            {
+                <div class="card bg-white shadow-sm border-0">
+                    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="card-title mb-0 fw-semibold"><i class="bi bi-shield-exclamation me-2"></i>Contraindicaciones</h6>
+                        <a asp-page="/Ejercicios/Index" class="btn-close btn-close-white" aria-label="Cerrar"></a>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="fw-semibold mb-2">@Model.EjercicioActual.Nombre</div>
+                        @if (Model.ContraindicacionesActuales.Count == 0)
+                        {
+                            <p class="text-muted small">El ejercicio no tiene contraindicaciones registradas.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-group list-group-flush mb-3">
+                                @foreach (var c in Model.ContraindicacionesActuales)
+                                {
+                                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                        <span class="small"><span class="badge bg-light text-dark border me-1">@c.Tipo</span>@c.Nombre</span>
+                                        <form method="post" asp-page-handler="QuitarContraindicacion" asp-route-idCondicion="@c.IdCondicion" class="d-inline"
+                                              onsubmit="return confirm('¿Quitar esta contraindicación?');">
+                                            <input type="hidden" name="EjercicioDetalle" value="@Model.EjercicioActual.IdEjercicio" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Quitar"><i class="bi bi-x-lg"></i></button>
+                                        </form>
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        @if (Model.CondicionesDisponibles.Count > 0)
+                        {
+                            <form method="post" asp-page-handler="AgregarContraindicacion">
+                                <input type="hidden" name="EjercicioDetalle" value="@Model.EjercicioActual.IdEjercicio" />
+                                <label asp-for="IdCondicionContraindicacion" class="form-label small fw-semibold">Agregar condición contraindicada</label>
+                                <div class="d-flex gap-2">
+                                    <select asp-for="IdCondicionContraindicacion" class="form-select form-select-sm" required>
+                                        <option value="">-- Selecciona --</option>
+                                        @foreach (var c in Model.CondicionesDisponibles)
+                                        {
+                                            <option value="@c.IdCondicion">[@c.Tipo] @c.Nombre</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-dark btn-sm"><i class="bi bi-plus-lg"></i></button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="@(Model.PuedeEditar ? "col-lg-8" : "col-12")">
+        <div class="card bg-white shadow-sm border-0 mb-3">
+            <div class="card-body p-3">
+                <form method="get" class="row g-2">
+                    <div class="col-md-4">
+                        <input asp-for="Buscar" class="form-control form-control-sm" placeholder="Buscar ejercicio..." />
+                    </div>
+                    <div class="col-md-3">
+                        <select asp-for="FiltroGrupo" class="form-select form-select-sm">
+                            <option value="">Todos los grupos</option>
+                            @foreach (var g in Model.Grupos)
+                            {
+                                <option value="@g.IdGrupoMuscular">@g.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select asp-for="FiltroDificultad" class="form-select form-select-sm">
+                            <option value="">Todas las dificultades</option>
+                            @foreach (var d in Model.Dificultades)
+                            {
+                                <option value="@d.IdDificultad">@d.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark btn-sm w-100"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card bg-white shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3">Ejercicio</th>
+                            <th>Grupo muscular</th>
+                            <th>Dificultad</th>
+                            <th>Contraindicaciones</th>
+                            @if (Model.PuedeEditar)
+                            {
+                                <th class="text-end pe-3">Acciones</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Ejercicios.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="@(Model.PuedeEditar ? 5 : 4)" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                                    No se encontraron ejercicios.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var e in Model.Ejercicios)
+                        {
+                            <tr class="@(Model.EjercicioActual?.IdEjercicio == e.IdEjercicio ? "table-active" : "")">
+                                <td class="ps-3">
+                                    <div class="fw-semibold text-dark">@e.Nombre</div>
+                                    <small class="text-muted">@e.Descripcion</small>
+                                </td>
+                                <td class="small">@e.GrupoMuscular</td>
+                                <td><span class="badge bg-light text-dark border">@e.Dificultad</span></td>
+                                <td class="small text-muted">@(e.Contraindicaciones ?? "Ninguna")</td>
+                                @if (Model.PuedeEditar)
+                                {
+                                    <td class="text-end pe-3 text-nowrap">
+                                        <a asp-page-handler="Editar" asp-route-id="@e.IdEjercicio" class="btn btn-outline-dark btn-sm" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-page="/Ejercicios/Index" asp-route-EjercicioDetalle="@e.IdEjercicio" class="btn btn-outline-secondary btn-sm" title="Contraindicaciones">
+                                            <i class="bi bi-shield-exclamation"></i>
+                                        </a>
+                                        <form method="post" asp-page-handler="Eliminar" asp-route-id="@e.IdEjercicio" class="d-inline"
+                                              onsubmit="return confirm('@(e.UsosEnRutinas > 0 ? $"Este ejercicio aparece {e.UsosEnRutinas} vez(es) en rutinas. Al eliminarlo se quitará de esas rutinas y de sus contraindicaciones. " : "")¿Eliminar el ejercicio?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

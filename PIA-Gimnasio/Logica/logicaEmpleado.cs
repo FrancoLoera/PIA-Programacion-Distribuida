@@ -86,6 +86,14 @@ namespace PIA_Gimnasio.Logica
             return _bd.EjecutarStoredProcedure("dbo.SP_EMPLEADO", p);
         }
 
+        public DataTable ConsultarEntrenadoresDisponibles()
+        {
+            SqlParameter[] p = {
+                new SqlParameter("@Accion", 9)
+            };
+            return _bd.EjecutarStoredProcedure("dbo.SP_EMPLEADO", p);
+        }
+
         public bdRespuesta DarDeBaja(int id, int idUsuario = 1)
         {
             SqlParameter[] p = {

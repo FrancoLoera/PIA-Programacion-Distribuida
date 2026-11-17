@@ -243,7 +243,7 @@ namespace PIA_Gimnasio.Pages.Rutinas
                 AlertasMedicas = AlertasMedicas.FindAll(a => a.IdEmpleado == idEmpleadoFiltro);
             CatalogoEjercicios = _logicaRutina.ConsultarEjercicios();
             Socios = _logicaCliente.Consultar(null, null, 1);
-            Empleados = _logicaEmpleado.Consultar(null, 2, 1);
+            Empleados = _logicaEmpleado.ConsultarEntrenadoresDisponibles();
 
             if (RutinaDetalle.HasValue && RutinaDetalle > 0 && EsRutinaPropia(RutinaDetalle.Value))
             {

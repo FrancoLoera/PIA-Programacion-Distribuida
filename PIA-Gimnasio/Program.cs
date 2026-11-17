@@ -41,6 +41,7 @@ builder.Services.AddScoped<logicaControlAcceso>();
 builder.Services.AddScoped<logicaReserva>();
 builder.Services.AddScoped<logicaExpediente>();
 builder.Services.AddScoped<logicaRutina>();
+builder.Services.AddScoped<logicaEjercicio>();
 builder.Services.AddScoped<logicaReporte>();
 builder.Services.AddScoped<logicaAuditoria>();
 

@@ -251,7 +251,7 @@
                                     <label class="form-label small fw-semibold">Condición del Catálogo *</label>
                                     <select asp-for="IdCondicionAsociar" class="form-select form-select-sm" required>
                                         <option value="">-- Selecciona condición --</option>
-                                        @foreach (var cat in Model.CatalogoCondiciones)
+                                        @foreach (var cat in Model.CondicionesDisponibles)
                                         {
                                             <option value="@cat.IdCondicion">[@cat.Tipo] @cat.Nombre</option>
                                         }
@@ -292,6 +292,10 @@
                             {
                                 foreach (System.Data.DataRow s in Model.Socios.Rows)
                                 {
+                                    if (Model.SociosConExpediente.Contains(Convert.ToInt32(s["IdCliente"])))
+                                    {
+                                        continue;
+                                    }
                                     <option value="@s["IdCliente"]">[@s["Folio"]] @s["Nombres"] @s["PrimerApellido"] @s["SegundoApellido"]</option>
                                 }
                             }

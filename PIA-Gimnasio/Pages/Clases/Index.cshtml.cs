@@ -142,7 +142,7 @@ namespace PIA_Gimnasio.Pages.Clases
         {
             Clases = _logicaClase.Consultar(Buscar, FiltroFecha, FiltroSalon, FiltroEmpleado, FiltroEstatus);
             Salones = _logicaSalon.Consultar(null, 1); // Salones activos
-            Instructores = _logicaEmpleado.Consultar(null, 2, 1);
+            Instructores = _logicaEmpleado.ConsultarEntrenadoresDisponibles();
             Especialidades = _logicaClase.ConsultarEspecialidades();
         }
 

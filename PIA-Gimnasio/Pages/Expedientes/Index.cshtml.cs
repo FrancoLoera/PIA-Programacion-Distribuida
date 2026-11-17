@@ -36,6 +36,8 @@ namespace PIA_Gimnasio.Pages.Expedientes
         public DataTable Socios { get; set; } = new DataTable();
         public bdExpediente? ExpedienteActual { get; set; }
         public List<bdExpedienteCondicion> CondicionesActuales { get; set; } = new List<bdExpedienteCondicion>();
+        public List<int> SociosConExpediente { get; set; } = new List<int>();
+        public List<bdCondicion> CondicionesDisponibles => CatalogoCondiciones.FindAll(c => !CondicionesActuales.Exists(a => a.IdCondicion == c.IdCondicion));
 
         // Crear expediente
         [BindProperty]
@@ -190,6 +192,7 @@ namespace PIA_Gimnasio.Pages.Expedientes
             Expedientes = _logicaExpediente.Consultar(FiltroCliente, FiltroTipoSangre, idEntrenador);
             CatalogoCondiciones = _logicaExpediente.CatalogoCondiciones();
             Socios = _logicaCliente.Consultar();
+            SociosConExpediente = _logicaExpediente.Consultar().ConvertAll(e => e.IdCliente);
 
             if (EsEntrenador)
             {

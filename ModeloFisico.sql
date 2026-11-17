@@ -1584,7 +1584,7 @@ BEGIN
 
     IF @Accion = 2 -- Por Id
     BEGIN
-        SELECT S.IdSalon, S.NombreNumero, S.IdSucursal, Suc.Nombre AS Sucursal, S.IdEstatus, E.Nombre AS Estatus
+        SELECT S.IdSalon, S.NombreNumero, S.IdSucursal, Suc.Nombre AS Sucursal, Suc.IdEstatus AS IdEstatusSucursal, S.IdEstatus, E.Nombre AS Estatus
         FROM dbo.SALON S
         INNER JOIN dbo.SUCURSAL Suc ON S.IdSucursal = Suc.IdSucursal
         INNER JOIN dbo.ESTATUS_SALON E ON S.IdEstatus = E.IdEstatusSalon
@@ -1593,7 +1593,7 @@ BEGIN
 
     IF @Accion = 3 -- Consulta general
     BEGIN
-        SELECT S.IdSalon, S.NombreNumero, S.IdSucursal, Suc.Nombre AS Sucursal, S.IdEstatus, E.Nombre AS Estatus
+        SELECT S.IdSalon, S.NombreNumero, S.IdSucursal, Suc.Nombre AS Sucursal, Suc.IdEstatus AS IdEstatusSucursal, S.IdEstatus, E.Nombre AS Estatus
         FROM dbo.SALON S
         INNER JOIN dbo.SUCURSAL Suc ON S.IdSucursal = Suc.IdSucursal
         INNER JOIN dbo.ESTATUS_SALON E ON S.IdEstatus = E.IdEstatusSalon
@@ -1974,6 +1974,17 @@ BEGIN
         SELECT 'Especialidad desvinculada correctamente.' AS Mensaje, 'success' AS TipoMensaje;
     END
 
+    IF @Accion = 9
+    BEGIN
+        SELECT E.IdEmpleado, E.Nombres, E.PrimerApellido, E.SegundoApellido,
+               E.IdSucursal, S.Nombre AS Sucursal, P.Nombre AS Puesto
+        FROM dbo.EMPLEADO E
+        INNER JOIN dbo.SUCURSAL S ON E.IdSucursal = S.IdSucursal
+        INNER JOIN dbo.PUESTO P ON E.IdPuesto = P.IdPuesto
+        WHERE E.IdPuesto = 2 AND E.IdEstatus = 1 AND S.IdEstatus = 1
+        ORDER BY E.PrimerApellido, E.SegundoApellido, E.Nombres;
+    END
+
     IF @Accion = 8 -- Listar especialidades del empleado
     BEGIN
         SELECT Esp.IdEspecialidad, Esp.Nombre, Esp.Descripcion
@@ -2205,8 +2216,26 @@ BEGIN
         FROM dbo.CLIENTE WHERE IdCliente = @IdCliente;
     END
 
-    IF @Accion IN (2, 3, 8)
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+    IF @Accion IN (2, 3, 8, 9)
+    BEGIN
+        UPDATE dbo.SUSCRIPCION
+        SET IdEstatus = 3
+        WHERE IdEstatus = 2
+          AND FechaVencimiento < CAST(GETDATE() AS DATE);
+
+        UPDATE dbo.SUSCRIPCION
+        SET IdEstatus = 2
+        WHERE IdEstatus = 1
+          AND FechaInicio <= CAST(GETDATE() AS DATE);
+
+        UPDATE dbo.CLIENTE
+        SET IdEstatus = 4
+        WHERE IdEstatus = 1
+          AND NOT EXISTS (
+              SELECT 1 FROM dbo.SUSCRIPCION S
+              WHERE S.IdCliente = CLIENTE.IdCliente AND S.IdEstatus IN (1, 2)
+          );
+    END
 
     IF @Accion = 2 -- Consultar por Id
     BEGIN
@@ -2615,9 +2644,10 @@ BEGIN
 
     IF @Accion = 1 -- Insertar ejercicio
     BEGIN
-        IF @Nombre IS NULL OR TRIM(@Nombre) = '' OR @IdGrupoMuscular IS NULL OR @IdDificultad IS NULL
+        IF @Nombre IS NULL OR TRIM(@Nombre) = '' OR @Descripcion IS NULL OR TRIM(@Descripcion) = ''
+           OR @IdGrupoMuscular IS NULL OR @IdDificultad IS NULL
         BEGIN
-            SELECT 'El nombre, grupo muscular y dificultad son obligatorios.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El nombre, la descripción, el grupo muscular y la dificultad son obligatorios.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -2647,7 +2677,14 @@ BEGIN
     BEGIN
         SELECT E.IdEjercicio, E.Nombre, E.Descripcion,
                E.IdGrupoMuscular, GM.Nombre AS GrupoMuscular,
-               E.IdDificultad, D.Nombre AS Dificultad
+               E.IdDificultad, D.Nombre AS Dificultad,
+               (
+                   SELECT STRING_AGG(C.Nombre, ', ')
+                   FROM dbo.EJERCICIO_CONTRAINDICACION EC
+                   INNER JOIN dbo.CONDICION C ON EC.IdCondicion = C.IdCondicion
+                   WHERE EC.IdEjercicio = E.IdEjercicio
+               ) AS Contraindicaciones,
+               (SELECT COUNT(*) FROM dbo.DETALLE_RUTINA DR WHERE DR.IdEjercicio = E.IdEjercicio) AS UsosEnRutinas
         FROM dbo.EJERCICIO E
         INNER JOIN dbo.GRUPO_MUSCULAR GM ON E.IdGrupoMuscular = GM.IdGrupoMuscular
         INNER JOIN dbo.DIFICULTAD D ON E.IdDificultad = D.IdDificultad
@@ -2761,8 +2798,7 @@ BEGIN
     DECLARE @ValoresAnteriores NVARCHAR(MAX);
     DECLARE @ValoresNuevos     NVARCHAR(MAX);
 
-    IF @Accion <> 6
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+    EXEC dbo.SP_CLIENTE @Accion = 9;
 
     IF @Accion = 1 -- Contratar suscripción
     BEGIN
@@ -2878,7 +2914,7 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'UPDATE', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
 
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+        EXEC dbo.SP_CLIENTE @Accion = 9;
         EXEC dbo.SP_CLIENTE @Accion = 7, @IdCliente = @IdCliente, @IdUsuario = @IdUsuario;
 
         SELECT 'Suscripción actualizada correctamente.' AS Mensaje, 'success' AS TipoMensaje;
@@ -2902,30 +2938,9 @@ BEGIN
         INSERT INTO dbo.AUDITORIA (NombreTabla, IdRegistro, TipoOperacion, ValoresAnteriores, ValoresNuevos, IdUsuario)
         VALUES ('SUSCRIPCION', @IdSuscripcion, 'BAJA', @ValoresAnteriores, @ValoresNuevos, @IdUsuario);
 
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+        EXEC dbo.SP_CLIENTE @Accion = 9;
 
         SELECT 'Suscripción cancelada correctamente. Se conserva en el historial pero impide acceso inmediato.' AS Mensaje, 'success' AS TipoMensaje;
-    END
-
-    IF @Accion = 6
-    BEGIN
-        UPDATE dbo.SUSCRIPCION
-        SET IdEstatus = 3
-        WHERE IdEstatus = 2
-          AND FechaVencimiento < CAST(GETDATE() AS DATE);
-
-        UPDATE dbo.SUSCRIPCION
-        SET IdEstatus = 2
-        WHERE IdEstatus = 1
-          AND FechaInicio <= CAST(GETDATE() AS DATE);
-
-        UPDATE dbo.CLIENTE
-        SET IdEstatus = 4
-        WHERE IdEstatus = 1
-          AND NOT EXISTS (
-              SELECT 1 FROM dbo.SUSCRIPCION S
-              WHERE S.IdCliente = CLIENTE.IdCliente AND S.IdEstatus IN (1, 2)
-          );
     END
 END;
 GO
@@ -2968,7 +2983,7 @@ BEGIN
 
     IF @Accion = 1 -- Registrar entrada (Regla 6.3)
     BEGIN
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+        EXEC dbo.SP_CLIENTE @Accion = 9;
 
         IF NOT EXISTS (
             SELECT 1 FROM dbo.SUCURSAL
@@ -3173,15 +3188,23 @@ BEGIN
         END
 
         -- Validar salón disponible
-        IF NOT EXISTS (SELECT 1 FROM dbo.SALON WHERE IdSalon = @IdSalon AND IdEstatus = 1)
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.SALON Sa
+            INNER JOIN dbo.SUCURSAL Su ON Sa.IdSucursal = Su.IdSucursal
+            WHERE Sa.IdSalon = @IdSalon AND Sa.IdEstatus = 1 AND Su.IdEstatus = 1
+        )
         BEGIN
-            SELECT 'El salón seleccionado no está disponible para programar clases.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El salón seleccionado no está disponible o su sucursal no está activa.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
-        IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado AND IdEstatus = 1 AND IdPuesto = 2)
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.EMPLEADO E
+            INNER JOIN dbo.SUCURSAL S ON E.IdSucursal = S.IdSucursal
+            WHERE E.IdEmpleado = @IdEmpleado AND E.IdEstatus = 1 AND E.IdPuesto = 2 AND S.IdEstatus = 1
+        )
         BEGIN
-            SELECT 'El empleado seleccionado no es un entrenador activo.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El empleado seleccionado no es un entrenador activo de una sucursal activa.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
@@ -3366,7 +3389,7 @@ BEGIN
 
     IF @Accion = 1 -- Crear reserva
     BEGIN
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+        EXEC dbo.SP_CLIENTE @Accion = 9;
 
         -- 1. Validar socio activo
         IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTE WHERE IdCliente = @IdCliente AND IdEstatus = 1)
@@ -3621,13 +3644,17 @@ BEGIN
             RETURN;
         END
 
-        IF NOT EXISTS (SELECT 1 FROM dbo.EMPLEADO WHERE IdEmpleado = @IdEmpleado AND IdEstatus = 1 AND IdPuesto = 2)
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.EMPLEADO E
+            INNER JOIN dbo.SUCURSAL S ON E.IdSucursal = S.IdSucursal
+            WHERE E.IdEmpleado = @IdEmpleado AND E.IdEstatus = 1 AND E.IdPuesto = 2 AND S.IdEstatus = 1
+        )
         BEGIN
-            SELECT 'El responsable de la rutina debe ser un entrenador activo.' AS Mensaje, 'warning' AS TipoMensaje;
+            SELECT 'El responsable de la rutina debe ser un entrenador activo de una sucursal activa.' AS Mensaje, 'warning' AS TipoMensaje;
             RETURN;
         END
 
-        EXEC dbo.SP_SUSCRIPCION @Accion = 6;
+        EXEC dbo.SP_CLIENTE @Accion = 9;
 
         IF NOT EXISTS (
             SELECT 1 FROM dbo.SUSCRIPCION
